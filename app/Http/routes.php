@@ -20,7 +20,7 @@ Route::group(['middleware' => 'cors'], function() {
     Route::resource('horarios', 'HorariosController', ['except' => ['create', 'edit']]);
     Route::post('horarios/{horario_id}/asistencias', 'AsistenciasController@store');
     Route::post('login', 'UsersController@login');
-    Route::resource('materias', 'MateriasController', ['except' => ['create', 'edit']]);
+    Route::resource('pedidos', 'PedidosController', ['only' => ['store']]);
     Route::resource('programas', 'ProgramasController', ['only' => ['index']]);
     Route::get('tutores', 'UsersController@get_tutores');
     Route::get('tutores/{tutor_id}/calificaciones', 'CalificacionesController@get_by_tutor');
