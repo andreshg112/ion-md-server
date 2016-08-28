@@ -25,12 +25,11 @@ class PedidosController extends Controller
                 $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
             } else {
                 $rules = [
-                'celular' => 'required|numeric',
-                'nombres'  => 'required|string',
-                'apellidos'  => 'required|string',
-                'email'  => 'email',
-                'pedido.detalles'  => 'required|string',
-                'pedido.dia'  => 'required|in:lunes,martes,miércoles,jueves,viernes,sábado,domingo'
+                'cliente.celular' => 'required|numeric',
+                'cliente.nombres'  => 'required|string',
+                'cliente.apellidos'  => 'required|string',
+                'cliente.email'  => 'email',
+                'detalles'  => 'required|string',
                 ];
                 try {
                     $validator = \Validator::make($request->all(), $rules);
@@ -40,14 +39,13 @@ class PedidosController extends Controller
                         $respuesta['mensaje'] = '¡Error!';
                     } else {
                         $datos = $request->all();
-                        $pedido = $datos['pedido'];
-                        unset($datos['pedido']);
-                        $cliente = Cliente::firstOrNew(['celular' => $datos['celular']]);
-                        $cliente->fill($datos)->save();
-                        $respuesta['result'] = $cliente->pedidos()->save(new Pedido($pedido));
+                        $cli = $datos['cliente'];
+                        unset($datos['cliente']);
+                        $cliente = Cliente::firstOrNew(['celular' => $cli['celular']]);
+                        $cliente->fill($cli)->save();
+                        $respuesta['result'] = $cliente->pedidos()->save(new Pedido($datos));
                         if ($respuesta['result']) {
                             $respuesta['mensaje'] = "Registrado correctamente.";
-                            $respuesta['result'] = $pedido;
                         } else {
                             $respuesta['mensaje'] = "No se pudo registrar.";
                         }
