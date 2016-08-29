@@ -17,7 +17,8 @@ class CreateClientesTable extends Migration
             $table->string('celular', 10)->unique();
             $table->string('nombres', 30);
             $table->string('apellidos', 30);
-            $table->string('email', 50)->unique()->nullable();
+            //$table->string('email', 50)->unique()->nullable();
+            $table->string('email', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

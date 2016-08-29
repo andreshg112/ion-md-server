@@ -11,9 +11,10 @@ use \DB;
 class PedidosController extends Controller
 {
     
-    public function index()
+    public function index(Request $request)
     {
-        return Pedido::all();
+        $enviado = $request->get('enviado');
+        return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")->get();
     }
     
     public function store(Request $request)
@@ -24,22 +25,24 @@ class PedidosController extends Controller
                 $respuesta['result'] = false;
                 $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
             } else {
+                $datos = $request->all();
+                $cli = $datos['cliente'];
+                $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null ;
                 $rules = [
                 'cliente.celular' => 'required|numeric',
                 'cliente.nombres'  => 'required|string',
                 'cliente.apellidos'  => 'required|string',
-                'cliente.email'  => 'email',
+                //'cliente.email' => 'unique:clientes,email,'.$cli['celular'].'celular',
+                'cliente.email' => 'email',
                 'detalles'  => 'required|string',
                 ];
                 try {
-                    $validator = \Validator::make($request->all(), $rules);
+                    $validator = \Validator::make($datos, $rules);
                     if ($validator->fails()) {
                         $respuesta['result'] = false;
                         $respuesta['validator'] = $validator->errors()->all();
                         $respuesta['mensaje'] = '¡Error!';
                     } else {
-                        $datos = $request->all();
-                        $cli = $datos['cliente'];
                         unset($datos['cliente']);
                         $cliente = Cliente::firstOrNew(['celular' => $cli['celular']]);
                         $cliente->fill($cli)->save();
@@ -62,50 +65,47 @@ class PedidosController extends Controller
     public function update(Request $request, $id)
     {
         $respuesta = [];
-        if (!is_array($request->all())) {
-            $respuesta['result'] = false;
-            $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
-        } else {
-            $instancia = Horario::find($id);
-            if ($instancia) {
-                $instancia->fill($request->all());
-                $rules = [
-                'materia_id'      => 'required|exists:materias,id',
-                'tutor_id'  => 'required|exists:users,id,tipo_usuario,tutor',
-                'dia'  => 'required|in:lunes,martes,miércoles,jueves,viernes,sábado',
-                'hora_inicio'  => 'required',
-                'hora_fin'  => 'required'
-                ];
-                try {
-                    $validator = \Validator::make($request->all(), $rules);
-                    if ($validator->fails()) {
-                        $respuesta['result'] = false;
-                        $respuesta['validator'] = $validator->errors()->all();
-                        $respuesta['mensaje'] = '¡Error!';
-                    } else {
-                        $respuesta['result'] = $instancia->save();
-                        if ($respuesta['result']) {
-                            $respuesta['mensaje'] = "Actualizado correctamente.";
-                            $respuesta['result'] = $instancia;
-                        } else {
-                            $respuesta['mensaje'] = "No se pudo actualizar.";
-                        }
-                    }
-                } catch (Exception $e) {
-                    $respuesta['result'] = false;
-                    $respuesta['mensaje'] = "Error: $e";
-                }
-            } else {
+        DB::transaction(function () use($request, &$respuesta, $id) {
+            if (!is_array($request->all())) {
                 $respuesta['result'] = false;
-                $respuesta['mensaje'] = 'No se encuentra registrado.';
+                $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
+            } else {
+                $instancia = Pedido::find($id);
+                if ($instancia) {
+                    $rules = [
+                    'detalles'      => 'required|string',
+                    'enviado'  => 'required|boolean'
+                    ];
+                    try {
+                        $validator = \Validator::make($request->all(), $rules);
+                        if ($validator->fails()) {
+                            $respuesta['result'] = false;
+                            $respuesta['validator'] = $validator->errors()->all();
+                            $respuesta['mensaje'] = '¡Error!';
+                        } else {
+                            $datos = $request->all();
+                            $cliente = $datos['cliente'];
+                            $instancia->fill($datos);
+                            $respuesta['result'] = $instancia->save();
+                            if ($respuesta['result']) {
+                                $respuesta['mensaje'] = "Actualizado correctamente.";
+                                $respuesta['result'] = $instancia;
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), "Su pedido ha sido enviado.");
+                            } else {
+                                $respuesta['mensaje'] = "No se pudo actualizar.";
+                            }
+                        }
+                    } catch (Exception $e) {
+                        $respuesta['result'] = false;
+                        $respuesta['mensaje'] = "Error: $e";
+                    }
+                } else {
+                    $respuesta['result'] = false;
+                    $respuesta['mensaje'] = 'No se encuentra registrado.';
+                }
             }
-        }
+        });
         return $respuesta;
-    }
-    
-    public function show($id)
-    {
-        return Horario::findOrFail($id);
     }
     
 }

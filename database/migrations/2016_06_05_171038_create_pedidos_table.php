@@ -20,7 +20,7 @@ class CreatePedidosTable extends Migration
             ->onDelete('cascade')
             ->onUpdate('cascade');
             $table->string('detalles');
-            $table->enum('dia', ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']);
+            $table->boolean('enviado')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
