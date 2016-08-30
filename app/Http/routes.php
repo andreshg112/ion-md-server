@@ -19,12 +19,12 @@ Route::group(['middleware' => 'cors'], function() {
     Route::resource('calificaciones', 'CalificacionesController', ['only' => ['store', 'update']]);
     Route::resource('horarios', 'HorariosController', ['except' => ['create', 'edit']]);
     Route::post('horarios/{horario_id}/asistencias', 'AsistenciasController@store');
-    Route::post('login', 'UsersController@login');
     Route::get('tutores', 'UsersController@get_tutores');
     Route::get('tutores/{tutor_id}/calificaciones', 'CalificacionesController@get_by_tutor');
     Route::get('tutores/{tutor_id}/asistencias', 'AsistenciasController@get_by_tutor');
     Route::resource('users', 'UsersController', ['only' => ['index', 'store']]);*/
     
+    Route::post('authenticate', 'AuthenticateController@authenticate');
     Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update']]);
     Route::resource('clientes', 'ClientesController', ['only' => ['show']]);
 });

@@ -35,6 +35,7 @@ class PedidosController extends Controller
                 //'cliente.email' => 'unique:clientes,email,'.$cli['celular'].'celular',
                 'cliente.email' => 'email',
                 'detalles'  => 'required|string',
+                'establecimiento_id' => 'required|exists:establecimientos,id'
                 ];
                 try {
                     $validator = \Validator::make($datos, $rules);
@@ -90,7 +91,7 @@ class PedidosController extends Controller
                             if ($respuesta['result']) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), "Su pedido ha sido enviado.");
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $cliente['nombres'].", su pedido ha sido enviado.");
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }

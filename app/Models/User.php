@@ -26,8 +26,8 @@ class User extends Authenticatable
     'password', 'remember_token',
     ];
     
-    public function programa() {
-        return $this->belongsTo(Programa::class);
+    public function establecimiento() {
+        return $this->belongsTo(Establecimiento::class);
     }
     
 }
