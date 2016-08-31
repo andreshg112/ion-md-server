@@ -23,6 +23,11 @@ class CreateUsersTable extends Migration
             $table->string('segundo_apellido', 15)->nullable();
             $table->enum('genero', ['masculino', 'femenino', 'otro']);
             $table->enum('rol', ['ADMIN', 'EMPLEADO'])->default('EMPLEADO');
+            $table->integer('establecimiento_id')->unsigned();
+            $table->foreign('establecimiento_id')
+            ->references('id')->on('establecimientos')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

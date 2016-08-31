@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class MateriasTableSeeder extends Seeder
+class EstablecimientosTableSeeder extends Seeder
 {
     /**
     * Run the database seeds.
@@ -11,7 +11,8 @@ class MateriasTableSeeder extends Seeder
     */
     public function run()
     {
-        //
-        factory('App\Models\Materia', 10)->create();
+        DB::table('establecimientos')->insert([
+        'nombre' => 'Restaurante Local'
+        ]);
     }
 }

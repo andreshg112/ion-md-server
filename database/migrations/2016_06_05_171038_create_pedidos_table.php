@@ -20,7 +20,14 @@ class CreatePedidosTable extends Migration
             ->onDelete('cascade')
             ->onUpdate('cascade');
             $table->string('detalles');
+            $table->string('direccion', 100);
+            $table->bigInteger('numero');
             $table->boolean('enviado')->default(0);
+            $table->integer('establecimiento_id')->unsigned();
+            $table->foreign('establecimiento_id')
+            ->references('id')->on('establecimientos')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

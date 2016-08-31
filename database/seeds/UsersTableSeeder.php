@@ -12,16 +12,13 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         DB::table('users')->insert([
-        'email' => 'administrador@unicesar.edu.co',
+        'username' => 'localempleado1',
         'password' => '1234',
-        'tipo_documento' => 'CC',
-        'numero_documento' => '1234567890',
-        'primer_nombre' => 'Juan',
-        'primer_apellido' => 'Díaz',
-        'tipo_usuario' => 'administrador',
+        'primer_nombre' => 'Empleado 1',
+        'primer_apellido' => 'Local',
+        'rol' => 'EMPLEADO',
         'genero' => 'masculino',
-        'created_at' => new DateTime(),
-        'updated_at' => new DateTime(),
+        'establecimiento_id' => 1
         ]);
     }
 }

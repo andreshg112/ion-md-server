@@ -27,14 +27,19 @@ class PedidosController extends Controller
             } else {
                 $datos = $request->all();
                 $cli = $datos['cliente'];
-                $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null ;
+                $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null;
                 $rules = [
-                'cliente.celular' => 'required|numeric',
-                'cliente.nombres'  => 'required|string',
-                'cliente.apellidos'  => 'required|string',
-                //'cliente.email' => 'unique:clientes,email,'.$cli['celular'].'celular',
-                'cliente.email' => 'email',
                 'detalles'  => 'required|string',
+                'direccion' => 'required|string',
+                'numero' => 'required|numeric|digits_between:7,10',
+                'cliente.id' => 'numeric|exists:clientes,id',
+                'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
+                'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
+                'cliente.nombre_completo'  => 'required|string',
+                'cliente.email' => 'email',
+                'cliente.direccion_casa'  => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_otra',
+                'cliente.direccion_oficina' => 'string|required_without_all:cliente.direccion_casa,cliente.direccion_otra',
+                'cliente.direccion_otra' => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_casa',
                 'establecimiento_id' => 'required|exists:establecimientos,id'
                 ];
                 try {
@@ -45,7 +50,7 @@ class PedidosController extends Controller
                         $respuesta['mensaje'] = '¡Error!';
                     } else {
                         unset($datos['cliente']);
-                        $cliente = Cliente::firstOrNew(['celular' => $cli['celular']]);
+                        $cliente = Cliente::firstOrNew(['id' => $cli['id']]);
                         $cliente->fill($cli)->save();
                         $respuesta['result'] = $cliente->pedidos()->save(new Pedido($datos));
                         if ($respuesta['result']) {

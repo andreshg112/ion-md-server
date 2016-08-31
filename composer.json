@@ -13,7 +13,8 @@
         "barryvdh/laravel-cors": "^0.8.0",
         "felixkiss/uniquewith-validator": "2.*",
         "caouecs/laravel-lang": "~3.0",
-        "tymon/jwt-auth": "0.5.*"
+        "tymon/jwt-auth": "0.5.*",
+        "doctrine/dbal": "v2.5.4"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
