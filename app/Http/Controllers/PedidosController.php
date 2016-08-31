@@ -98,7 +98,7 @@ class PedidosController extends Controller
                             if ($respuesta['result']) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $cliente['nombres'].", su pedido ha sido enviado.");
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $cliente['nombre_completo'].", su pedido ha sido enviado.");
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }
