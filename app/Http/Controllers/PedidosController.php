@@ -80,6 +80,8 @@ class PedidosController extends Controller
                 if ($instancia) {
                     $rules = [
                     'detalles'      => 'required|string',
+                    'direccion' => 'required|string',
+                    'numero' => 'required|numeric|digits_between:7,10',
                     'enviado'  => 'required|boolean'
                     ];
                     try {
