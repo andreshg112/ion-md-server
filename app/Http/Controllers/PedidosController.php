@@ -36,7 +36,7 @@ class PedidosController extends Controller
                 'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
                 'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
                 'cliente.nombre_completo'  => 'required|string',
-                'cliente.email' => 'email',
+                'cliente.email' => 'email|unique:clientes,email,'.$cli['id'],
                 'cliente.direccion_casa'  => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_otra',
                 'cliente.direccion_oficina' => 'string|required_without_all:cliente.direccion_casa,cliente.direccion_otra',
                 'cliente.direccion_otra' => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_casa',
