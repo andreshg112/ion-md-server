@@ -17,6 +17,10 @@ class ClientesController extends Controller
     public function index(Request $request)
     {
         $nombre_completo = $request->input('nombre_completo', '');
-        return Cliente::where('nombre_completo', 'like', "%$nombre_completo%")->limit(5)->get();
+        $establecimiento_id = $request->input('establecimiento_id', '');
+        return Cliente::where('nombre_completo', 'like', "%$nombre_completo%")
+        ->whereHas('pedidos', function ($q) use($establecimiento_id) {
+            $q->where('establecimiento_id', $establecimiento_id);
+        })->limit(5)->get();
     }
 }
