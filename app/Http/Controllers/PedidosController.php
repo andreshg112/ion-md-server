@@ -10,6 +10,17 @@ use \DB;
 
 class PedidosController extends Controller
 {
+    public function getPedidosCliente(Request $request, $cliente_id)
+    {
+        $establecimiento_id = $request->input('establecimiento_id', '');
+        $limit = $request->input('limit', 5);
+        $enviado = $request->input('enviado', '');
+        return Pedido::where('cliente_id', $cliente_id)
+        ->where('establecimiento_id', $establecimiento_id)
+        ->where('enviado', 'like', "%$enviado%")
+        ->limit($limit)
+        ->get();
+    }
     
     public function index(Request $request)
     {

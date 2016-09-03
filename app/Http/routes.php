@@ -27,4 +27,5 @@ Route::group(['middleware' => 'cors'], function() {
     Route::post('authenticate', 'AuthenticateController@authenticate');
     Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update']]);
     Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
+    Route::get('clientes/{cliente_id}/pedidos', 'PedidosController@getPedidosCliente');
 });
