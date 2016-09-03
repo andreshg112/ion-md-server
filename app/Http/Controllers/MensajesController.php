@@ -19,7 +19,8 @@ class MensajesController extends Controller
         "apikey" => "8d8f85de70729f67238d14f4dff1188d687d2565",
         "mensaje" => $mensaje,
         "numcelular" => $numero,
-        "numregion" => "57"
+        "numregion" => "57",
+        "sandbox" => 1
         )
         )
         );
