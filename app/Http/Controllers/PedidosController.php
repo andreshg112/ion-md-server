@@ -24,8 +24,11 @@ class PedidosController extends Controller
     
     public function index(Request $request)
     {
-        $enviado = $request->get('enviado');
-        return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")->get();
+        $enviado = $request->input('enviado', '');
+        $establecimiento_id = $request->input('establecimiento_id', '');
+        return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
+        ->where('establecimiento_id', $establecimiento_id)
+        ->get();
     }
     
     public function store(Request $request)
@@ -79,6 +82,7 @@ class PedidosController extends Controller
         return $respuesta;
     }
     
+    //Función para despachar los pedidos.
     public function update(Request $request, $id)
     {
         $respuesta = [];
@@ -93,7 +97,8 @@ class PedidosController extends Controller
                     'detalles'      => 'required|string',
                     'direccion' => 'required|string',
                     'numero' => 'required|numeric|digits_between:7,10',
-                    'enviado'  => 'required|boolean'
+                    'enviado'  => 'required|boolean',
+                    'establecimiento.mensaje' => 'string|required'
                     ];
                     try {
                         $validator = \Validator::make($request->all(), $rules);
@@ -104,12 +109,17 @@ class PedidosController extends Controller
                         } else {
                             $datos = $request->all();
                             $cliente = $datos['cliente'];
+                            $establecimiento = $datos['establecimiento'];
                             $instancia->fill($datos);
                             $respuesta['result'] = $instancia->save();
                             if ($respuesta['result']) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $cliente['nombre_completo'].", su pedido ha sido enviado.");
+                                //Construcción del mensaje personalizado
+                                $nombre = explode(' ', $cliente['nombre_completo']);
+                                $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
+                                $respuesta['notificacion'] = $mensaje;
+                                //$respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }
