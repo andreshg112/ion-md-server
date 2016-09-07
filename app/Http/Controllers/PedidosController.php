@@ -19,6 +19,7 @@ class PedidosController extends Controller
         ->where('establecimiento_id', $establecimiento_id)
         ->where('enviado', 'like', "%$enviado%")
         ->limit($limit)
+        ->orderBy('created_at', 'desc')
         ->get();
     }
     

@@ -28,4 +28,6 @@ Route::group(['middleware' => 'cors'], function() {
     Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update']]);
     Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
     Route::get('clientes/{cliente_id}/pedidos', 'PedidosController@getPedidosCliente');
+    Route::get('establecimientos/{establecimiento_id}/pedidos-dia-semana', 'EstablecimientosController@getPedidosDiaSemana');
+    Route::get('establecimientos/{establecimiento_id}/clientes', 'EstablecimientosController@getClientesEstablecimiento');
 });
