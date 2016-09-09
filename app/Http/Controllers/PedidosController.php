@@ -23,6 +23,25 @@ class PedidosController extends Controller
         ->get();
     }
     
+    public function destroy(Request $request, $id)
+    {
+        $instancia = Pedido::find($id);
+        $respuesta = [];
+        if ($instancia) {
+            $instancia->delete();
+            $respuesta['result'] = $instancia->trashed();
+            if ($respuesta['result']) {
+                $respuesta['mensaje'] = "Pedido cancelado correctamente.";
+                $respuesta['eliminado'] = $instancia;
+            } else {
+                $respuesta['mensaje'] = "Error tratando de eliminar.";
+            }
+        } else {
+            $respuesta['mensaje'] = "No se encuentra registrado.";
+        }
+        return $respuesta;
+    }
+    
     public function index(Request $request)
     {
         $enviado = $request->input('enviado', '');
@@ -119,8 +138,8 @@ class PedidosController extends Controller
                                 //Construcción del mensaje personalizado
                                 $nombre = explode(' ', $cliente['nombre_completo']);
                                 $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                $respuesta['notificacion'] = $mensaje;
-                                //$respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
+                                //$respuesta['notificacion'] = $mensaje;
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }

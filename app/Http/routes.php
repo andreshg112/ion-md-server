@@ -25,7 +25,7 @@ Route::group(['middleware' => 'cors'], function() {
     Route::resource('users', 'UsersController', ['only' => ['index', 'store']]);*/
     
     Route::post('authenticate', 'AuthenticateController@authenticate');
-    Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update']]);
+    Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update', 'destroy']]);
     Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
     Route::get('clientes/{cliente_id}/pedidos', 'PedidosController@getPedidosCliente');
     Route::get('establecimientos/{establecimiento_id}/pedidos-dia-semana', 'EstablecimientosController@getPedidosDiaSemana');

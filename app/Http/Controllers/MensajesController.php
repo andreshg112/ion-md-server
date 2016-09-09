@@ -48,9 +48,9 @@ class MensajesController extends Controller
     // de la URL suministrada por Altiria al dar de alta el servicio
     private static function AltiriaSMS($sDestination, $sMessage, $debug=false){
         $sData ='cmd=sendsms&';
-        $sData .='domainId=demopr&';
-        $sData .='login=andr11&';
-        $sData .='passwd=aouvafhp&';
+        $sData .='domainId=unicesar&';
+        $sData .='login=marthabonilla@unicesar.edu.co&';
+        $sData .='passwd=uni16ces9ar&';
         // Omitir la linea del remitente si no se cuenta con ninguno autorizado
         //$sData .='senderId='.$sSenderId.'&';
         $sData .='dest='.str_replace(',','&dest=',$sDestination).'&';
