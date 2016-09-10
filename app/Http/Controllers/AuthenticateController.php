@@ -43,10 +43,10 @@ class AuthenticateController extends Controller
                             $respuesta['token'] = JWTAuth::fromUser($user);
                             $respuesta['result'] = $user;
                         } else {
-                            $respuesta['mensaje'] = 'Contraseña incorrecta';
+                            $respuesta['mensaje'] = 'Contraseña incorrecta.';
                         }
                     } else {
-                        $respuesta['mensaje'] = 'El usuario ingresado no se encuentra registrado';
+                        $respuesta['mensaje'] = 'El usuario ingresado no se encuentra registrado.';
                     }
                 }
             } catch (Exception $e) {

@@ -70,10 +70,11 @@ class PedidosController extends Controller
                 'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
                 'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
                 'cliente.nombre_completo'  => 'required|string',
-                'cliente.email' => 'email|unique:clientes,email,'.$cli['id'],
+                'cliente.email' => 'email',
                 'cliente.direccion_casa'  => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_otra',
                 'cliente.direccion_oficina' => 'string|required_without_all:cliente.direccion_casa,cliente.direccion_otra',
                 'cliente.direccion_otra' => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_casa',
+                'cliente.fecha_nacimiento' => 'date',
                 'establecimiento_id' => 'required|exists:establecimientos,id'
                 ];
                 try {
@@ -138,8 +139,8 @@ class PedidosController extends Controller
                                 //Construcción del mensaje personalizado
                                 $nombre = explode(' ', $cliente['nombre_completo']);
                                 $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                //$respuesta['notificacion'] = $mensaje;
-                                $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
+                                $respuesta['notificacion'] = $mensaje;
+                                //$respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }
