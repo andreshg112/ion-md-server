@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\Cliente;
 use App\Models\Pedido;
-use \DB;
+use DB;
 
 class PedidosController extends Controller
 {
