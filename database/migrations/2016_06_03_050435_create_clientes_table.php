@@ -23,6 +23,7 @@ class CreateClientesTable extends Migration
             $table->string('email')->unique()->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->engine = 'InnoDB';
         });
     }
     
