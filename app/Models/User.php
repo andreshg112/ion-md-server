@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+* La clase User representa un usuario de una sede (sede es un atributo, no una clase).
+* Un User de una sede, pertenece a una Marca (Establecimiento).
+* Podran haber varios Users en una sede, que se identificaran por el atributo sede.
+* Si tienen igual valor en el atributo sede, pertenecen a una misma sede.
+* El atributo tipo_usuario se usa para almacenar el rol ADMIN o EMPLEADO, de una sede.
+* Actualmente el usuario representa la sede.
+*/
 class User extends Authenticatable
 {
     use SoftDeletes;
@@ -14,7 +22,7 @@ class User extends Authenticatable
     * @var array
     */
     protected $fillable = [
-    'email', 'password', 'tipo_documento', 'numero_documento', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'genero', 'tipo_usuario', 'programa_id',
+    'email', 'password', 'tipo_documento', 'numero_documento', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'genero', 'tipo_usuario', 'sede_id'
     ];
     
     /**
@@ -28,6 +36,10 @@ class User extends Authenticatable
     
     public function establecimiento() {
         return $this->belongsTo(Establecimiento::class);
+    }
+
+    public function sede() {
+        return $this->belongsTo(Sede::class);
     }
     
 }

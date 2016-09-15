@@ -37,7 +37,8 @@ class AuthenticateController extends Controller
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
                     $credentials = $request->only('username', 'password');
-                    $user = User::with('establecimiento')->where('username', $credentials['username'])->first();
+                    $user = User::with('establecimiento', 'sede')
+                    ->where('username', $credentials['username'])->first();
                     if ($user) {
                         if ($credentials['password'] == $user->password) {
                             $respuesta['token'] = JWTAuth::fromUser($user);

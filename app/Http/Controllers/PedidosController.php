@@ -45,6 +45,7 @@ class PedidosController extends Controller
     public function index(Request $request)
     {
         $enviado = $request->input('enviado', '');
+        $sede_id = $request->input('sede_id', '');
         $establecimiento_id = $request->input('establecimiento_id', '');
         return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
         ->where('establecimiento_id', $establecimiento_id)
