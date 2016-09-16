@@ -41,7 +41,8 @@ class AuthenticateController extends Controller
                     ->where('username', $credentials['username'])->first();
                     if ($user) {
                         if ($credentials['password'] == $user->password) {
-                            $respuesta['token'] = JWTAuth::fromUser($user);
+                            //$respuesta['token'] = JWTAuth::fromUser($user);
+                            $user->token = JWTAuth::fromUser($user);
                             $respuesta['result'] = $user;
                         } else {
                             $respuesta['mensaje'] = 'Contraseña incorrecta.';
