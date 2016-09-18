@@ -11,14 +11,20 @@ class UsersTableSeeder extends Seeder
     */
     public function run()
     {
-        DB::table('users')->insert([
-        'username' => 'localempleado1',
-        'password' => '1234',
-        'primer_nombre' => 'Empleado 1',
-        'primer_apellido' => 'Local',
-        'rol' => 'EMPLEADO',
-        'genero' => 'masculino',
-        'establecimiento_id' => 1
-        ]);
+        DB::transaction(function () {
+            $super_user_id = DB::table('users')->insertGetId([
+            'username' => 'fidelivery_su',
+            'email' => 'fideliveryapp@gmail.com',
+            'password' => password_hash('fd17.Yre', PASSWORD_DEFAULT),
+            'primer_nombre' => 'Fidelivery',
+            'primer_apellido' => 'SU',
+            'rol' => 'SUPER_USER',
+            'genero' => 'masculino'
+            ]);
+            
+            DB::table('super_users')->insert([
+            'user_id' => $super_user_id
+            ]);
+        });
     }
 }
