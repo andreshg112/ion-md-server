@@ -8,27 +8,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
 * La clase Establecimiento representa una Marca, por ejemplo ArteSano, Pizza Station,
-* que puede tener una o varias sedes (user).
-* Un Establecimiento (Marca) tiene un Dueno.
+* que puede tener una o varias sedes.
+* Un Establecimiento (Marca) tiene un Dueno (administrador).
 * El Dueno puede tener varias Marcas (Establecimientos).
 */
 class Establecimiento extends Model
 {
     use SoftDeletes;
     protected $table = 'establecimientos';
-    /**
-    * The attributes that are mass assignable.
-    *
-    * @var array
-    */
-    protected $fillable = ['nombre'];
+    protected $fillable = ['nombre', 'mensaje', 'administrador_id'];
     
     public function sedes() {
         return $this->hasMany(Sede::class);
     }
     
-    public function users() {
-        return $this->hasMany(User::class);
+    public function administrador() {
+        return $this->belongsTo(Administrador::class);
+    }
+    
+    /**
+    * Elimina al establecimiento, y con el, sus relaciones directas.
+    * @return bool|null
+    */
+    public function delete()
+    {
+        $this->sedes()->delete();
+        return parent::delete();
     }
     
 }

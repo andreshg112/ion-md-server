@@ -24,7 +24,6 @@ class AuthenticateController extends Controller
         $respuesta = [];
         $respuesta['result'] = false;
         DB::transaction(function() use($request, &$respuesta) {
-            
             try {
                 $rules = [
                 'username'      => 'required|string',
@@ -37,11 +36,9 @@ class AuthenticateController extends Controller
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
                     $credentials = $request->only('username', 'password');
-                    $user = User::with('establecimiento', 'sede')
-                    ->where('username', $credentials['username'])->first();
+                    $user = User::where('username', $credentials['username'])->first();
                     if ($user) {
-                        if ($credentials['password'] == $user->password) {
-                            //$respuesta['token'] = JWTAuth::fromUser($user);
+                        if (password_verify($credentials['password'], $user->password)) {
                             $user->token = JWTAuth::fromUser($user);
                             $respuesta['result'] = $user;
                         } else {
