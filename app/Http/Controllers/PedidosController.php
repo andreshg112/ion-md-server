@@ -7,16 +7,21 @@ use App\Http\Requests;
 use App\Models\Cliente;
 use App\Models\Pedido;
 use DB;
+use App\Models\Vendedor;
+use App\Models\Sede;
+use Carbon\Carbon;
 
 class PedidosController extends Controller
 {
     public function getPedidosCliente(Request $request, $cliente_id)
     {
         $establecimiento_id = $request->input('establecimiento_id', '');
+        $sedes_id = Sede::select('id')->where('establecimiento_id', $establecimiento_id)->get();
+        $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
         $limit = $request->input('limit', 5);
         $enviado = $request->input('enviado', '');
         return Pedido::where('cliente_id', $cliente_id)
-        ->where('establecimiento_id', $establecimiento_id)
+        ->whereIn('vendedor_id', $vendedores_id)
         ->where('enviado', 'like', "%$enviado%")
         ->limit($limit)
         ->orderBy('created_at', 'desc')
@@ -46,9 +51,9 @@ class PedidosController extends Controller
     {
         $enviado = $request->input('enviado', '');
         $sede_id = $request->input('sede_id', '');
-        $establecimiento_id = $request->input('establecimiento_id', '');
+        $vendedores_id = Vendedor::select('id')->where('sede_id', $sede_id)->get();
         return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
-        ->where('establecimiento_id', $establecimiento_id)
+        ->whereIn('vendedor_id', $vendedores_id)
         ->get();
     }
     
@@ -67,6 +72,7 @@ class PedidosController extends Controller
                 'detalles'  => 'required|string',
                 'direccion' => 'required|string',
                 'numero' => 'required|numeric|digits_between:7,10',
+                'vendedor_id' => 'numeric|exists:vendedores,id',
                 'cliente.id' => 'numeric|exists:clientes,id',
                 'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
                 'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
@@ -76,7 +82,7 @@ class PedidosController extends Controller
                 'cliente.direccion_oficina' => 'string|required_without_all:cliente.direccion_casa,cliente.direccion_otra',
                 'cliente.direccion_otra' => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_casa',
                 'cliente.fecha_nacimiento' => 'date',
-                'establecimiento_id' => 'required|exists:establecimientos,id'
+                'cliente.establecimiento_id' => 'required|exists:establecimientos,id'
                 ];
                 try {
                     $validator = \Validator::make($datos, $rules);
@@ -132,7 +138,13 @@ class PedidosController extends Controller
                             $datos = $request->all();
                             $cliente = $datos['cliente'];
                             $establecimiento = $datos['establecimiento'];
+                            if($instancia->enviado == 0 && $datos['enviado'] == 1) {
+                                //Se esta despachando
+                                $segundos = Carbon::instance($instancia->created_at)
+                                ->diffInSeconds(Carbon::now());
+                            }
                             $instancia->fill($datos);
+                            $instancia->tiempo_despacho = $segundos;
                             $respuesta['result'] = $instancia->save();
                             if ($respuesta['result']) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";

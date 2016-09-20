@@ -19,8 +19,7 @@ class ClientesController extends Controller
         $nombre_completo = $request->input('nombre_completo', '');
         $establecimiento_id = $request->input('establecimiento_id', '');
         return Cliente::where('nombre_completo', 'like', "%$nombre_completo%")
-        ->whereHas('pedidos', function ($q) use($establecimiento_id) {
-            $q->where('establecimiento_id', $establecimiento_id);
-        })->limit(5)->orderBy('nombre_completo', 'asc')->get();
+        ->where('establecimiento_id', $establecimiento_id)
+        ->limit(5)->orderBy('nombre_completo', 'asc')->get();
     }
 }

@@ -42,7 +42,7 @@ class User extends Authenticatable
         $this->vendedor()->delete();
         return parent::delete();
     }
-    
+
     /**
     * Guarda al user. Si es ADMIN, lo guarda tambien en la tabla administradores.
     * @return bool

@@ -40,6 +40,15 @@ class AuthenticateController extends Controller
                     if ($user) {
                         if (password_verify($credentials['password'], $user->password)) {
                             $user->token = JWTAuth::fromUser($user);
+                            if($user->rol == 'VENDEDOR') {
+                                $user->load(['vendedor', 'vendedor.sede', 'vendedor.sede.establecimiento']);
+                                if(!isset($user->vendedor)) {
+                                    $user = false;
+                                    $respuesta['mensaje'] = 'El vendedor no tiene una sede asignada.';
+                                }
+                            } elseif ($user->rol == 'ADMIN') {
+                                $user->load(['administrador', 'administrador.establecimientos', 'administrador.establecimientos.sedes']);
+                            }
                             $respuesta['result'] = $user;
                         } else {
                             $respuesta['mensaje'] = 'Contraseña incorrecta.';

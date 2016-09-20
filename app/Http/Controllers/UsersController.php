@@ -21,8 +21,14 @@ class UsersController extends Controller
         //$super_user_id = $request->input('user_id', null);
         if(is_null($rol)){
             return User::whereIn('rol', ['ADMIN', 'VENDEDOR'])->get();
-        } else {
+        } elseif($rol == 'ADMIN') {
             return User::with('administrador')->where('rol', $rol)->has('administrador')->get();
+        } else {
+            $sin_sede = $request->input('sin_sede', false);
+            if($sin_sede){
+                return User::where('rol', $rol)->has('vendedor', '=', 0)->get();
+            }
+            return User::where('rol', $rol)->get();
         }
     }
     
@@ -70,17 +76,6 @@ class UsersController extends Controller
             }
         });
         return $respuesta;
-    }
-    
-    /**
-    * Display the specified resource.
-    *
-    * @param  int  $id
-    * @return \Illuminate\Http\Response
-    */
-    public function show($id)
-    {
-        //
     }
     
     /**

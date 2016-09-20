@@ -4,20 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests;
-use App\Models\Establecimiento;
 use DB;
 use App\Models\Sede;
+use App\Models\Vendedor;
 
-class EstablecimientosController extends Controller
+class SedesController extends Controller
 {
-    public function getSedes($id)
-    {
-        return Sede::where('establecimiento_id', $id)->get();
-    }
-    
     public function index()
     {
-        return Establecimiento::with(['administrador', 'administrador.user'])->get();
+        return Sede::with('establecimiento')->get();
     }
     
     public function store(Request $request)
@@ -28,8 +23,7 @@ class EstablecimientosController extends Controller
             try {
                 $rules = [
                 'nombre'      => 'string|required',
-                'mensaje'      => 'string|required',
-                'administrador_id' => 'exists:administradores,id|required'
+                'establecimiento_id' => 'exists:establecimientos,id'
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
@@ -37,10 +31,12 @@ class EstablecimientosController extends Controller
                     $respuesta['validator'] = $validator->errors()->all();
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
-                    $instancia = new Establecimiento($request->all());
+                    $datos_recibidos = $request->all();
+                    $instancia = new Sede($datos_recibidos);
                     $respuesta['result'] = $instancia->save();
                     if ($respuesta['result']) {
                         $respuesta['mensaje'] = "Registrado correctamente.";
+                        $respuesta['result'] = $instancia;
                     } else {
                         $respuesta['mensaje'] = "No se pudo registrar.";
                     }
@@ -60,8 +56,7 @@ class EstablecimientosController extends Controller
             try {
                 $rules = [
                 'nombre'      => 'string|required',
-                'mensaje'      => 'string|required',
-                'administrador_id' => 'exists:administradores,id|required'
+                'establecimiento_id' => 'exists:establecimientos,id'
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
@@ -69,7 +64,7 @@ class EstablecimientosController extends Controller
                     $respuesta['validator'] = $validator->errors()->all();
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
-                    $instancia = Establecimiento::find($id);
+                    $instancia = Sede::find($id);
                     $instancia->fill($request->all());
                     $respuesta['result'] = $instancia->save();
                     if ($respuesta['result']) {
@@ -87,7 +82,7 @@ class EstablecimientosController extends Controller
     
     public function destroy($id)
     {
-        $instancia = Establecimiento::find($id);
+        $instancia = Sede::find($id);
         $respuesta = [];
         if ($instancia) {
             $instancia->delete();

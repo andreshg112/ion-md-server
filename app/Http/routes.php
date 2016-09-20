@@ -18,20 +18,27 @@ Route::group(['middleware' => 'cors'], function() {
     Route::post('authenticate', 'AuthenticateController@authenticate');
     Route::group(['middleware' => 'jwt.auth'], function () {
         
+        //Administradores
+        Route::get('administradores/{administrador_id}/pedidos-dia-semana', 'AdministradoresController@getPedidosDiaSemana');
+        Route::get('administradores/{administrador_id}/clientes', 'AdministradoresController@getClientes');
+        
         //Clientes
         Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
         Route::get('clientes/{cliente_id}/pedidos', 'PedidosController@getPedidosCliente');
         
         //Establecimientos
         Route::resource('establecimientos', 'EstablecimientosController', ['except' => ['create', 'edit']]);
-        Route::get('establecimientos/{establecimiento_id}/pedidos-dia-semana', 'EstablecimientosController@getPedidosDiaSemana');
-        Route::get('establecimientos/{establecimiento_id}/clientes', 'EstablecimientosController@getClientesEstablecimiento');
         
         //Pedidos
         Route::resource('pedidos', 'PedidosController', ['only' => ['index', 'store', 'update', 'destroy']]);
         
+        //Sedes
+        Route::resource('sedes', 'SedesController', ['except' => ['create', 'edit']]);
+        
         //Users
         Route::resource('users', 'UsersController', ['only' => ['index', 'store', 'update', 'destroy']]);
         
+        //Vendedores
+        Route::resource('vendedores', 'VendedoresController', ['only' => ['index', 'store', 'destroy']]);
     });
 });

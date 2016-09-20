@@ -27,8 +27,38 @@ class Sede extends Model
         return $this->belongsTo(Establecimiento::class);
     }
     
-    public function users() {
-        return $this->hasMany(User::class);
+    public function vendedores() {
+        return $this->hasMany(Vendedor::class);
     }
     
+    public function delete()
+    {
+        $this->vendedores()->delete();
+        return parent::delete();
+    }
+    
+    /*public function save(array $options = [])
+    {
+        $saved = false;
+        $parent_saved = parent::save();
+        if($parent_saved){
+            print_r($this->vendedores);
+            if(count($this->vendedores) > 0){
+                $vendedores_saved = $this->vendedores()->saveMany(
+                array_map(function ($user) {
+                    return new Vendedor(['user_id' => $user['id']]);
+                },
+                $this->vendedores)
+                );
+                if($vendedores_saved){
+                    $saved = true;
+                } else {
+                    $this->delete();
+                }
+            } else {
+                $saved = true;
+            }
+        }
+        return $saved;
+    }*/
 }
