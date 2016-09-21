@@ -13,6 +13,34 @@ use App\Models\Cliente;
 
 class AdministradoresController extends Controller
 {
+    public function felicitarCliente(Request $request, $administrador_id)
+    {
+        $respuesta = [];
+        $respuesta['result'] = false;
+        DB::transaction(function() use($request, &$respuesta) {
+            try {
+                $rules = [
+                'mensaje'      => 'string|max:155|required',
+                'cliente.celular' => 'numeric|exists:clientes,celular'
+                ];
+                $validator = \Validator::make($request->all(), $rules);
+                if ($validator->fails()) {
+                    $respuesta['validator'] = $validator->errors()->all();
+                    $respuesta['mensaje'] = '¡Error!';
+                } else {
+                    $datos_recibidos = $request->all();
+                    $cliente = $datos_recibidos['cliente'];
+                    $mensaje = $datos_recibidos['mensaje'];
+                    $respuesta['result'] = true;
+                    $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
+                }
+            } catch (Exception $e) {
+                $respuesta['mensaje'] = $e->getMessage();
+            }
+        });
+        return $respuesta;
+    }
+    
     public function getClientes(Request $request, $administrador_id)
     {
         $cumpleanos = $request->input('cumpleanos', false);
@@ -23,7 +51,9 @@ class AdministradoresController extends Controller
         } else {
             array_push($establecimientos_id, $establecimiento_id);
         }
-        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id) as total_pedidos'))->whereIn('establecimiento_id', $establecimientos_id)
+        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id) as total_pedidos'))
+        ->with('establecimiento')
+        ->whereIn('establecimiento_id', $establecimientos_id)
         ->orderBy('total_pedidos', 'desc')->orderBy('nombre_completo', 'asc');
         if($cumpleanos) {
             $consulta_base->where('fecha_nacimiento', DB::raw('date(now())'));
@@ -40,7 +70,8 @@ class AdministradoresController extends Controller
         
         // Si no se envia establecimiento, se consultan todos los de un administrador.
         if(!isset($establecimiento_id)){
-            $establecimientos_id = Establecimiento::select('id')->where('administrador_id', $administrador_id)->get();
+            $establecimientos_id = Establecimiento::select('id')
+            ->where('administrador_id', $administrador_id)->get();
         } else {
             array_push($establecimientos_id, $establecimiento_id);
         }

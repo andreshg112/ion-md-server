@@ -21,6 +21,7 @@ Route::group(['middleware' => 'cors'], function() {
         //Administradores
         Route::get('administradores/{administrador_id}/pedidos-dia-semana', 'AdministradoresController@getPedidosDiaSemana');
         Route::get('administradores/{administrador_id}/clientes', 'AdministradoresController@getClientes');
+        Route::post('administradores/{administrador_id}/felicitaciones', 'AdministradoresController@felicitarCliente');
         
         //Clientes
         Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);

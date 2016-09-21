@@ -12,6 +12,11 @@ class Cliente extends Model
     protected $fillable = ['celular', 'telefono', 'nombre_completo', 'email', 'direccion_casa', 'direccion_oficina', 'direccion_otra', 'fecha_nacimiento', 'establecimiento_id'];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
     
+    public function establecimiento()
+    {
+        return $this->belongsTo(Establecimiento::class);
+    }
+    
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);
