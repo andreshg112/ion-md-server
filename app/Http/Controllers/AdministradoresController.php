@@ -10,9 +10,55 @@ use DB;
 use App\Models\Sede;
 use App\Models\Vendedor;
 use App\Models\Cliente;
+use App\Models\Oferta;
 
 class AdministradoresController extends Controller
 {
+    public function enviarOferta(Request $request, $administrador_id)
+    {
+        $respuesta = [];
+        $respuesta['result'] = false;
+        DB::transaction(function() use($request, &$respuesta, $administrador_id) {
+            try {
+                $rules = [
+                'mensaje' => 'string|max:155|required',
+                'clientes.*.celular' => 'numeric|exists:clientes,celular'
+                ];
+                $validator = \Validator::make($request->all(), $rules);
+                if ($validator->fails()) {
+                    $respuesta['validator'] = $validator->errors()->all();
+                    $respuesta['mensaje'] = '¡Error!';
+                } else {
+                    $datos_recibidos = $request->all();
+                    $clientes = $datos_recibidos['clientes'];
+                    unset($datos_recibidos['clientes']);
+                    $mensaje = $datos_recibidos['mensaje'];
+                    $instancia = new Oferta($datos_recibidos);
+                    $instancia->administrador_id = $administrador_id;
+                    $instancia_saved = $instancia->save();
+                    if($instancia_saved) {
+                        $respuesta['result'] = $instancia->clientes()->saveMany(
+                        array_map(function($cliente){
+                            return Cliente::find($cliente['id']);
+                        }, $clientes)
+                        );
+                        if($respuesta['result']){
+                            $destinatarios = Utilities::concatenarDestinatarios($clientes);
+                            $respuesta['notificacion'] = $destinatarios; //Modo prueba
+                            //$respuesta['notificacion'] = MensajesController::envioMasivo($destinatarios, $mensaje);
+                        } else {
+                            $instancia->delete();
+                            $respuesta['mensaje'] = 'No se pudo guardar.';
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                $respuesta['mensaje'] = $e->getMessage();
+            }
+        });
+        return $respuesta;
+    }
+    
     public function felicitarCliente(Request $request, $administrador_id)
     {
         $respuesta = [];
@@ -51,7 +97,7 @@ class AdministradoresController extends Controller
         } else {
             array_push($establecimientos_id, $establecimiento_id);
         }
-        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id) as total_pedidos'))
+        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id and deleted_at is null) as total_pedidos'))
         ->with('establecimiento')
         ->whereIn('establecimiento_id', $establecimientos_id)
         ->orderBy('total_pedidos', 'desc')->orderBy('nombre_completo', 'asc');

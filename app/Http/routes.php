@@ -12,16 +12,22 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    header('Location: http://fidelivery.co');
+    die();
+    //return view('welcome');
 });
+
 Route::group(['middleware' => 'cors'], function() {
+    
     Route::post('authenticate', 'AuthenticateController@authenticate');
+    
     Route::group(['middleware' => 'jwt.auth'], function () {
         
         //Administradores
         Route::get('administradores/{administrador_id}/pedidos-dia-semana', 'AdministradoresController@getPedidosDiaSemana');
         Route::get('administradores/{administrador_id}/clientes', 'AdministradoresController@getClientes');
         Route::post('administradores/{administrador_id}/felicitaciones', 'AdministradoresController@felicitarCliente');
+        Route::post('administradores/{administrador_id}/ofertas', 'AdministradoresController@enviarOferta');
         
         //Clientes
         Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
