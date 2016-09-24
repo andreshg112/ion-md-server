@@ -152,8 +152,8 @@ class PedidosController extends Controller
                                 //Construcción del mensaje personalizado
                                 $nombre = explode(' ', $cliente['nombre_completo']);
                                 $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                $respuesta['notificacion'] = $mensaje;
-                                //$respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
+                                $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }

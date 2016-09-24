@@ -44,8 +44,7 @@ class AdministradoresController extends Controller
                         );
                         if($respuesta['result']){
                             $destinatarios = Utilities::concatenarDestinatarios($clientes);
-                            $respuesta['notificacion'] = $destinatarios; //Modo prueba
-                            //$respuesta['notificacion'] = MensajesController::envioMasivo($destinatarios, $mensaje);
+                            $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
                         } else {
                             $instancia->delete();
                             $respuesta['mensaje'] = 'No se pudo guardar.';
@@ -78,7 +77,8 @@ class AdministradoresController extends Controller
                     $cliente = $datos_recibidos['cliente'];
                     $mensaje = $datos_recibidos['mensaje'];
                     $respuesta['result'] = true;
-                    $respuesta['notificacion'] = MensajesController::enviarMensaje(intval($cliente['celular']), $mensaje);
+                    $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
+                    $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
                 }
             } catch (Exception $e) {
                 $respuesta['mensaje'] = $e->getMessage();

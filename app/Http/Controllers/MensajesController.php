@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 class MensajesController extends Controller
 {
-    public static function envioMasivo($destinatarios, $mensaje)
+    public static function enviarMensaje($destinatarios, $mensaje)
     {
+        //return $destinatarios . ' ' . $mensaje;
         return MensajesController::AltiriaSMS($destinatarios, $mensaje);
-    }
-    
-    public static function enviarMensaje($numero, $mensaje)
-    {
-        return MensajesController::AltiriaSMS('57'.$numero, $mensaje);
     }
     
     // sDestination: lista de numeros de telefono separados por comas.
