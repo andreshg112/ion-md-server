@@ -11,6 +11,8 @@ use App\Models\Sede;
 use App\Models\Vendedor;
 use App\Models\Cliente;
 use App\Models\Oferta;
+use App\Models\Administrador;
+use Carbon\Carbon;
 
 class AdministradoresController extends Controller
 {
@@ -162,5 +164,54 @@ class AdministradoresController extends Controller
         ->count();
         
         return $respuesta;
+    }
+    
+    public function getPedidosPorDiaEnLapso(Request $request, $administrador_id)
+    {
+        $establecimiento_id = $request->get('establecimiento_id');
+        $sede_id = $request->get('sede_id');
+        $establecimientos_id = [];
+        $sedes_id = [];
+        
+        if(!isset($establecimiento_id)){
+            $establecimientos_id = Establecimiento::select('id')->where('administrador_id', $administrador_id)->get();
+        } else {
+            array_push($establecimientos_id, $establecimiento_id);
+        }
+        
+        if(!isset($sede_id)){
+            $sedes_id = Sede::select('id')->whereIn('establecimiento_id', $establecimientos_id)->get();
+        } else {
+            array_push($sedes_id, $sede_id);
+        }
+        
+        $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
+        
+        $fecha_final_str = $request->get('fecha_final');
+        $fecha_final = (!isset($fecha_final_str)) ? Carbon::now() : Carbon::createFromFormat('Y-m-d', $fecha_final_str);
+        $fecha_inicial = $request->input('fecha_inicial', $fecha_final->copy()->subMonth());
+        
+        return Pedido::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, count(enviado) pedidos_enviados')
+        ->whereIn('vendedor_id', $vendedores_id)
+        ->whereBetween('created_at', [$fecha_inicial, $fecha_final])
+        ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
+        ->get();
+    }
+    
+    public function getClientesPorGenero(Request $request, $administrador_id)
+    {
+        $establecimiento_id = $request->get('establecimiento_id');
+        $establecimientos_id = [];
+        
+        if(!isset($establecimiento_id)){
+            $establecimientos_id = Establecimiento::select('id')
+            ->where('administrador_id', $administrador_id)->get();
+        } else {
+            array_push($establecimientos_id, $establecimiento_id);
+        }
+        
+        return Cliente::selectRaw('count(*) as cantidad, genero')
+        ->whereIn('establecimiento_id', $establecimientos_id)
+        ->groupBy('genero')->get();
     }
 }

@@ -20,6 +20,11 @@ class Administrador extends Authenticatable
         return $this->hasMany(Establecimiento::class);
     }
     
+    public function sedes()
+    {
+        return $this->hasManyThrough(Sede::class, Establecimiento::class);
+    }
+    
     public function user()
     {
         return $this->belongsTo(User::class);

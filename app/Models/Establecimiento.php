@@ -18,12 +18,19 @@ class Establecimiento extends Model
     protected $table = 'establecimientos';
     protected $fillable = ['nombre', 'mensaje', 'administrador_id'];
     
-    public function sedes() {
+    public function administrador()
+    {
+        return $this->belongsTo(Administrador::class);
+    }
+    
+    public function sedes()
+    {
         return $this->hasMany(Sede::class);
     }
     
-    public function administrador() {
-        return $this->belongsTo(Administrador::class);
+    public function vendedores()
+    {
+        return $this->hasManyThrough(Vendedor::class, Sede::class);
     }
     
     /**
