@@ -17,7 +17,7 @@ class Pedido extends Model
 {
     use SoftDeletes;
     protected $table = 'pedidos';
-    protected $fillable = ['cliente_id', 'detalles', 'direccion', 'numero', 'enviado', 'vendedor_id', 'created_at', 'user_id', 'tiempo_despacho'];
+    protected $fillable = ['cliente_id', 'detalles', 'direccion', 'numero', 'enviado', 'vendedor_id', 'created_at', 'user_id', 'tiempo_despacho', 'total'];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
     
     public function cliente()
