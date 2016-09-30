@@ -16,7 +16,7 @@ class Establecimiento extends Model
 {
     use SoftDeletes;
     protected $table = 'establecimientos';
-    protected $fillable = ['nombre', 'mensaje', 'administrador_id'];
+    protected $fillable = ['nombre', 'mensaje', 'administrador_id', 'plan_id'];
     
     public function administrador()
     {

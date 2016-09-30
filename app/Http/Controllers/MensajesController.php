@@ -6,8 +6,8 @@ class MensajesController extends Controller
 {
     public static function enviarMensaje($destinatarios, $mensaje)
     {
-        return $destinatarios . ' ' . $mensaje;
-        //return MensajesController::AltiriaSMS($destinatarios, $mensaje);
+        // return $destinatarios . ' ' . $mensaje;
+        return MensajesController::AltiriaSMS($destinatarios, $mensaje);
     }
     
     // sDestination: lista de numeros de telefono separados por comas.

@@ -16,12 +16,12 @@ class Felicitaciones extends Migration
             $table->increments('id');
             
             $table->integer('administrador_id')->unsigned();
-            $table->foreign('administrador_id')->references('id')->on('administradores')
-            ->onUpdate('cascade');
+            $table->foreign('administrador_id')->references('id')
+            ->on('administradores')->onUpdate('cascade');
             
             $table->integer('cliente_id')->unsigned();
-            $table->foreign('cliente_id')->references('id')->on('clientes')
-            ->onUpdate('cascade');
+            $table->foreign('cliente_id')->references('id')
+            ->on('clientes')->onUpdate('cascade');
             
             $table->timestamps();
             $table->softDeletes();

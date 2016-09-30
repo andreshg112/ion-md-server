@@ -29,7 +29,8 @@ class EstablecimientosController extends Controller
                 $rules = [
                 'nombre'      => 'string|required',
                 'mensaje'      => 'string|required',
-                'administrador_id' => 'exists:administradores,id|required'
+                'administrador_id' => 'exists:administradores,id|required',
+                'plan_id' => 'exists:planes,id|required'
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
@@ -61,7 +62,8 @@ class EstablecimientosController extends Controller
                 $rules = [
                 'nombre'      => 'string|required',
                 'mensaje'      => 'string|required',
-                'administrador_id' => 'exists:administradores,id|required'
+                'administrador_id' => 'exists:administradores,id|required',
+                'plan_id' => 'exists:planes,id|required'
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {

@@ -45,6 +45,9 @@ Route::group(['middleware' => 'cors'], function() {
         //Sedes
         Route::resource('sedes', 'SedesController', ['except' => ['create', 'edit']]);
         
+        //Planes
+        Route::resource('planes', 'PlanesController', ['only' => ['index']]);
+        
         //Users
         Route::resource('users', 'UsersController', ['only' => ['index', 'store', 'update', 'destroy']]);
         
