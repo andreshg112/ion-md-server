@@ -149,11 +149,15 @@ class PedidosController extends Controller
                             if ($respuesta['result']) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                //Construcción del mensaje personalizado
-                                $nombre = explode(' ', $cliente['nombre_completo']);
-                                $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
-                                $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                if($cliente['celular']) {
+                                    //Construcción del mensaje personalizado
+                                    $nombre = explode(' ', $cliente['nombre_completo']);
+                                    $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
+                                    $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
+                                    $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                } else {
+                                    $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
+                                }
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }

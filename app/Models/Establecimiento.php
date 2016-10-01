@@ -43,4 +43,13 @@ class Establecimiento extends Model
         return parent::delete();
     }
     
+    public static function restarSMS($establecimiento_id) {
+        $instancia = Establecimiento::find($establecimiento_id);
+        $instancia->sms_restantes--;
+        if($instancia->save()){
+            return $instancia->sms_restantes;
+        } else {
+            
+        }
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests;
 use App\Models\Establecimiento;
 use DB;
 use App\Models\Sede;
+use App\Models\Plan;
 
 class EstablecimientosController extends Controller
 {
@@ -39,8 +40,14 @@ class EstablecimientosController extends Controller
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
                     $instancia = new Establecimiento($request->all());
+                    $plan = Plan::find($instancia->plan_id);
+                    if($plan) {
+                        $instancia->sms_restantes = $plan->cantidad_sms;
+                        $instancia->vendedores_restantes = $plan->cantidad_vendedores;
+                    }
                     $respuesta['result'] = $instancia->save();
                     if ($respuesta['result']) {
+                        
                         $respuesta['mensaje'] = "Registrado correctamente.";
                     } else {
                         $respuesta['mensaje'] = "No se pudo registrar.";
@@ -73,6 +80,11 @@ class EstablecimientosController extends Controller
                 } else {
                     $instancia = Establecimiento::find($id);
                     $instancia->fill($request->all());
+                    $plan = Plan::find($instancia->plan_id);
+                    if($plan) {
+                        $instancia->sms_restantes = $plan->cantidad_sms;
+                        $instancia->vendedores_restantes = $plan->cantidad_vendedores;
+                    }
                     $respuesta['result'] = $instancia->save();
                     if ($respuesta['result']) {
                         $respuesta['mensaje'] = "Actualizado correctamente.";
