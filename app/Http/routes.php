@@ -33,7 +33,7 @@ Route::group(['middleware' => 'cors'], function() {
         Route::post('administradores/{administrador_id}/ofertas', 'AdministradoresController@enviarOferta');
         
         //Clientes
-        Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show']]);
+        Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show', 'store']]);
         Route::get('clientes/{cliente_id}/pedidos', 'PedidosController@getPedidosCliente');
         
         //Establecimientos
