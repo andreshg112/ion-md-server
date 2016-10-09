@@ -51,10 +51,21 @@ class PedidosController extends Controller
     {
         $enviado = $request->input('enviado', '');
         $sede_id = $request->input('sede_id', '');
+        
         $vendedores_id = Vendedor::select('id')->where('sede_id', $sede_id)->get();
-        return Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
-        ->whereIn('vendedor_id', $vendedores_id)
-        ->get();
+        $consulta_base = Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
+        ->whereIn('vendedor_id', $vendedores_id);
+        
+        $fecha_inicial = $request->input('fecha_inicial', null);
+        if(!is_null($fecha_inicial)){
+            $es_fecha_valida = Utilities::validateDate($fecha_inicial, 'Y-m-d');
+            if(!$es_fecha_valida){
+                $fecha_inicial = Carbon::now()->toDateTimeString();
+            }
+            $consulta_base->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_inicial]);
+        }
+        //return $consulta_base->getQuery();
+        return $consulta_base->get();
     }
     
     public function store(Request $request)

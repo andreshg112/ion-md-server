@@ -23,14 +23,7 @@ Route::group(['middleware' => 'cors'], function() {
     
     Route::group(['middleware' => 'jwt.auth'], function () {
         
-        //Administradores
-        Route::get('administradores/{administrador_id}/pedidos-dia-semana', 'AdministradoresController@getPedidosDiaSemana');
-        Route::get('administradores/{administrador_id}/clientes', 'AdministradoresController@getClientes');
-        Route::get('administradores/{administrador_id}/pedidos-por-dia-en-lapso', 'AdministradoresController@getPedidosPorDiaEnLapso');
-        Route::get('administradores/{administrador_id}/clientes-por-genero', 'AdministradoresController@getClientesPorGenero');
-        Route::get('administradores/{administrador_id}/valor-pedidos-por-dia', 'AdministradoresController@getValorPedidosPorDia');
-        Route::post('administradores/{administrador_id}/felicitaciones', 'AdministradoresController@felicitarCliente');
-        Route::post('administradores/{administrador_id}/ofertas', 'AdministradoresController@enviarOferta');
+        include('Routes/administradores.php');
         
         //Clientes
         Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show', 'store']]);
@@ -44,6 +37,7 @@ Route::group(['middleware' => 'cors'], function() {
         
         //Sedes
         Route::resource('sedes', 'SedesController', ['except' => ['create', 'edit']]);
+        Route::get('sedes/{sede_id}/resumen-dia', 'SedesController@getResumenDia');
         
         //Planes
         Route::resource('planes', 'PlanesController', ['only' => ['index']]);
