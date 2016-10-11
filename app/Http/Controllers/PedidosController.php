@@ -47,6 +47,12 @@ class PedidosController extends Controller
         return $respuesta;
     }
     
+    
+    /**
+    * Busca los pedidos de una sede.
+    * Para recibir los pedidos en cola, se envia el parametro enviado=0.
+    * Para filtrar entre fechas, se pasa el parametro fecha_inicial y hasta por fecha_final.
+    */
     public function index(Request $request)
     {
         $enviado = $request->input('enviado', '');
@@ -56,13 +62,12 @@ class PedidosController extends Controller
         $consulta_base = Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
         ->whereIn('vendedor_id', $vendedores_id);
         
-        $fecha_inicial = $request->input('fecha_inicial', null);
-        if(!is_null($fecha_inicial)){
-            $es_fecha_valida = Utilities::validateDate($fecha_inicial, 'Y-m-d');
-            if(!$es_fecha_valida){
-                $fecha_inicial = Carbon::now()->toDateTimeString();
-            }
-            $consulta_base->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_inicial]);
+        $fecha_inicial_str = $request->get('fecha_inicial');
+        if(isset($fecha_inicial_str)){
+            $fecha_inicial = Carbon::parse($fecha_inicial_str);
+            $fecha_final_str = $request->get('fecha_final');
+            $fecha_final = (!isset($fecha_final_str)) ? $fecha_inicial : Carbon::parse($fecha_final_str);
+            $consulta_base->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final]);
         }
         //return $consulta_base->getQuery();
         return $consulta_base->get();
