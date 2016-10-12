@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Models\Cliente;
+use App\Models\Establecimiento;
 use App\Models\Pedido;
-use DB;
-use App\Models\Vendedor;
 use App\Models\Sede;
+use App\Models\Vendedor;
+use App\Http\Requests;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Http\Request;
 
 class PedidosController extends Controller
 {
@@ -47,29 +48,42 @@ class PedidosController extends Controller
         return $respuesta;
     }
     
-    
     /**
     * Busca los pedidos de una sede.
     * Para recibir los pedidos en cola, se envia el parametro enviado=0.
-    * Para filtrar entre fechas, se pasa el parametro fecha_inicial y hasta por fecha_final.
+    * Por defecto, enviado=0 (Pedidos en cola).
+    * Para filtrar entre fechas, se pasan los parametros fecha_inicial y fecha_final.
+    * Para una sola fecha, se pasa el parametro fecha_inicial.
+    * Las fechas debe estar en formato YYYY-MM-DD.
+    * Para los pedidos de un establecimiento, se envía establecimiento_id.
+    * Para los pedidos de una sede, se envía sede_id.
     */
     public function index(Request $request)
     {
-        $enviado = $request->input('enviado', '');
-        $sede_id = $request->input('sede_id', '');
+        $enviado = $request->input('enviado', 0);
+        $establecimiento_id = $request->get('establecimiento_id');
+        $fecha_final_str = $request->get('fecha_final');
+        $fecha_inicial_str = $request->get('fecha_inicial');
+        $sede_id = $request->get('sede_id');
+        $vendedores_id = [];
         
-        $vendedores_id = Vendedor::select('id')->where('sede_id', $sede_id)->get();
-        $consulta_base = Pedido::with('cliente')->where('enviado', 'like', "%$enviado%")
+        if(isset($sede_id) && is_numeric($sede_id)) {
+            $vendedores_id = Vendedor::select('id')->where('sede_id', $sede_id)->get();
+        } elseif (isset($establecimiento_id) && is_numeric($establecimiento_id)) {
+            $establecimiento = Establecimiento::find($establecimiento_id);
+            $vendedores_id = ($establecimiento)
+            ? $establecimiento->vendedores->pluck('id') : [];
+        }
+        
+        $consulta_base = Pedido::with('cliente')->where('enviado', $enviado)
         ->whereIn('vendedor_id', $vendedores_id);
         
-        $fecha_inicial_str = $request->get('fecha_inicial');
         if(isset($fecha_inicial_str)){
             $fecha_inicial = Carbon::parse($fecha_inicial_str);
-            $fecha_final_str = $request->get('fecha_final');
-            $fecha_final = (!isset($fecha_final_str)) ? $fecha_inicial : Carbon::parse($fecha_final_str);
+            $fecha_final = (!isset($fecha_final_str))
+            ? $fecha_inicial : Carbon::parse($fecha_final_str);
             $consulta_base->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final]);
         }
-        //return $consulta_base->getQuery();
         return $consulta_base->get();
     }
     
