@@ -112,6 +112,7 @@ class PedidosController extends Controller
                         $cliente->fill($cli)->save();
                         $respuesta['result'] = $cliente->pedidos()->save(new Pedido($datos));
                         if ($respuesta['result']) {
+                            $respuesta['result']->load('cliente');
                             $respuesta['mensaje'] = "Registrado correctamente.";
                         } else {
                             $respuesta['mensaje'] = "No se pudo registrar.";

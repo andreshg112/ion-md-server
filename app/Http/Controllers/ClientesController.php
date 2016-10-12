@@ -19,9 +19,14 @@ class ClientesController extends Controller
     {
         $nombre_completo = $request->input('nombre_completo', '');
         $establecimiento_id = $request->input('establecimiento_id', '');
-        return Cliente::where('nombre_completo', 'like', "%$nombre_completo%")
+        $limit = $request->get('limit');
+        $consulta_base = Cliente::where('nombre_completo', 'like', "%$nombre_completo%")
         ->where('establecimiento_id', $establecimiento_id)
-        ->limit(5)->orderBy('nombre_completo', 'asc')->get();
+        ->orderBy('nombre_completo', 'asc');
+        if(isset($limit) && is_numeric($limit)) {
+            $consulta_base->limit($limit);
+        }
+        return $consulta_base->get();
     }
     
     public function store(Request $request)
