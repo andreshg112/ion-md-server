@@ -190,13 +190,16 @@ class AdministradoresController extends Controller
         $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
         
         $fecha_final_str = $request->get('fecha_final');
-        $fecha_final = (!isset($fecha_final_str)) ? Carbon::now() : Carbon::createFromFormat('Y-m-d', $fecha_final_str);
-        $fecha_inicial = $request->input('fecha_inicial', $fecha_final->copy()->subMonth());
+        $fecha_final = (!isset($fecha_final_str))
+        ? Carbon::now() : Carbon::parse($fecha_final_str);
+        $fecha_inicial_str = $request->get('fecha_inicial');
+        $fecha_inicial = (!isset($fecha_inicial_str))
+        ? $fecha_final->copy()->subMonth() : Carbon::parse($fecha_inicial_str);
         
         return Pedido
         ::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, count(enviado) as pedidos_enviados')
         ->whereIn('vendedor_id', $vendedores_id)
-        ->whereBetween('created_at', [$fecha_inicial, $fecha_final])
+        ->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final])
         ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
         ->get();
     }
@@ -225,12 +228,15 @@ class AdministradoresController extends Controller
         $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
         
         $fecha_final_str = $request->get('fecha_final');
-        $fecha_final = (!isset($fecha_final_str)) ? Carbon::now() : Carbon::createFromFormat('Y-m-d', $fecha_final_str);
-        $fecha_inicial = $request->input('fecha_inicial', $fecha_final->copy()->subMonth());
+        $fecha_final = (!isset($fecha_final_str))
+        ? Carbon::now() : Carbon::parse($fecha_final_str);
+        $fecha_inicial_str = $request->get('fecha_inicial');
+        $fecha_inicial = (!isset($fecha_inicial_str))
+        ? $fecha_final->copy()->subMonth() : Carbon::parse($fecha_inicial_str);
         
         return Pedido::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, sum(total) as valor')
         ->whereIn('vendedor_id', $vendedores_id)
-        ->whereBetween('created_at', [$fecha_inicial, $fecha_final])
+        ->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final])
         ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
         ->get();
     }
