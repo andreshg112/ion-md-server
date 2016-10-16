@@ -145,9 +145,9 @@ class PedidosController extends Controller
     public function update(Request $request, $id)
     {
         $respuesta = [];
+        $respuesta['result'] = false;
         DB::transaction(function () use($request, &$respuesta, $id) {
             if (!is_array($request->all())) {
-                $respuesta['result'] = false;
                 $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
             } else {
                 $instancia = Pedido::find($id);
@@ -157,48 +157,50 @@ class PedidosController extends Controller
                     'direccion' => 'required|string',
                     'numero' => 'required|numeric|digits_between:7,10',
                     'enviado'  => 'required|boolean',
-                    'establecimiento.mensaje' => 'string|required'
+                    'establecimiento.mensaje' => 'string|required_if:enviado,1'
                     ];
                     try {
                         $validator = \Validator::make($request->all(), $rules);
                         if ($validator->fails()) {
-                            $respuesta['result'] = false;
                             $respuesta['validator'] = $validator->errors()->all();
                             $respuesta['mensaje'] = '¡Error!';
                         } else {
                             $datos = $request->all();
                             $cliente = $datos['cliente'];
-                            $establecimiento = $datos['establecimiento'];
                             if($instancia->enviado == 0 && $datos['enviado'] == 1) {
                                 //Se esta despachando
                                 $segundos = Carbon::instance($instancia->created_at)
                                 ->diffInSeconds(Carbon::now());
                             }
                             $instancia->fill($datos);
-                            $instancia->tiempo_despacho = $segundos;
-                            $respuesta['result'] = $instancia->save();
-                            if ($respuesta['result']) {
+                            if(isset($segundos)) {
+                                //Si se calcularon los segundos de despacho.
+                                $instancia->tiempo_despacho = $segundos;
+                            }
+                            $guardo = $instancia->save();
+                            if ($guardo) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                if($cliente['celular']) {
-                                    //Construcción del mensaje personalizado
-                                    $nombre = explode(' ', $cliente['nombre_completo']);
-                                    $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                    $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
-                                    $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
-                                } else {
-                                    $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
+                                if(isset($segundos)) {
+                                    if($cliente['celular']) {
+                                        //Construcción del mensaje personalizado
+                                        $establecimiento = $datos['establecimiento'];
+                                        $nombre = explode(' ', $cliente['nombre_completo']);
+                                        $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
+                                        $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
+                                        $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                    } else {
+                                        $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
+                                    }
                                 }
                             } else {
                                 $respuesta['mensaje'] = "No se pudo actualizar.";
                             }
                         }
                     } catch (Exception $e) {
-                        $respuesta['result'] = false;
                         $respuesta['mensaje'] = "Error: $e";
                     }
                 } else {
-                    $respuesta['result'] = false;
                     $respuesta['mensaje'] = 'No se encuentra registrado.';
                 }
             }
