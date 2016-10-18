@@ -103,6 +103,9 @@ class PedidosController extends Controller
                 'direccion' => 'required|string',
                 'numero' => 'required|numeric|digits_between:7,10',
                 'vendedor_id' => 'numeric|exists:vendedores,id',
+                'subtotal' => 'numeric|required',
+                'valor_domicilio' => 'numeric',
+                'total' => 'numeric|required',
                 'cliente.id' => 'numeric|exists:clientes,id',
                 'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
                 'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
@@ -157,6 +160,9 @@ class PedidosController extends Controller
                     'direccion' => 'required|string',
                     'numero' => 'required|numeric|digits_between:7,10',
                     'enviado'  => 'required|boolean',
+                    'subtotal' => 'numeric|required',
+                    'valor_domicilio' => 'numeric',
+                    'total' => 'numeric|required',
                     'establecimiento.mensaje' => 'string|required_if:enviado,1'
                     ];
                     try {
@@ -189,6 +195,7 @@ class PedidosController extends Controller
                                         $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
                                         $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
                                         $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                        $respuesta['sms_restantes'] = Establecimiento::restarSMS($establecimiento['id']);
                                     } else {
                                         $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
                                     }

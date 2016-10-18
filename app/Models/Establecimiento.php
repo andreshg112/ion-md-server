@@ -49,7 +49,7 @@ class Establecimiento extends Model
         if($instancia->save()){
             return $instancia->sms_restantes;
         } else {
-            
+            return false;
         }
     }
 }
