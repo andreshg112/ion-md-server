@@ -31,7 +31,8 @@ class EstablecimientosController extends Controller
                 'nombre'      => 'string|required',
                 'mensaje'      => 'string|required',
                 'administrador_id' => 'exists:administradores,id|required',
-                'plan_id' => 'exists:planes,id|required'
+                'plan_id' => 'exists:planes,id|required',
+                'tiene_mensajero' => 'boolean'
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
