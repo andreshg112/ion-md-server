@@ -13,7 +13,7 @@ class AddTipoDomicilioToPedidos extends Migration
     public function up()
     {
         Schema::table('pedidos', function (Blueprint $table) {
-            $table->enum('tipo_domicilio', ['externo', 'propio'])
+            $table->enum('tipo_mensajero', ['externo', 'propio'])
             ->nullable()->after('subtotal');
         });
     }
@@ -26,7 +26,7 @@ class AddTipoDomicilioToPedidos extends Migration
     public function down()
     {
         Schema::table('pedidos', function (Blueprint $table) {
-            $table->dropColumn('tipo_domicilio');
+            $table->dropColumn('tipo_mensajero');
         });
     }
 }
