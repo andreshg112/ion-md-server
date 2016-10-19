@@ -104,6 +104,7 @@ class PedidosController extends Controller
                 'numero' => 'required|numeric|digits_between:7,10',
                 'vendedor_id' => 'numeric|exists:vendedores,id',
                 'subtotal' => 'numeric|required',
+                'tipo_domicilio' => 'in:externo,propio',
                 'valor_domicilio' => 'numeric',
                 'total' => 'numeric|required',
                 'cliente.id' => 'numeric|exists:clientes,id',
@@ -161,6 +162,7 @@ class PedidosController extends Controller
                     'numero' => 'required|numeric|digits_between:7,10',
                     'enviado'  => 'required|boolean',
                     'subtotal' => 'numeric|required',
+                    'tipo_domicilio' => 'in:externo,propio',
                     'valor_domicilio' => 'numeric',
                     'total' => 'numeric|required',
                     'establecimiento.mensaje' => 'string|required_if:enviado,1'
