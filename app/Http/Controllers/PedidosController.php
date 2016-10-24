@@ -90,9 +90,9 @@ class PedidosController extends Controller
     public function store(Request $request)
     {
         $respuesta = [];
+        $respuesta['result'] = false;
         DB::transaction(function () use($request, &$respuesta) {
             if (!is_array($request->all())) {
-                $respuesta['result'] = false;
                 $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
             } else {
                 $datos = $request->all();
@@ -100,11 +100,11 @@ class PedidosController extends Controller
                 $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null;
                 $rules = [
                 'detalles'  => 'required|string',
-                'direccion' => 'required|string',
+                'direccion' => 'string|required_if:tipo_pedido,domicilio',
                 'numero' => 'required|numeric|digits_between:7,10',
                 'vendedor_id' => 'numeric|exists:vendedores,id',
+                'tipo_pedido' => 'in:domicilio,mesa|required',
                 'subtotal' => 'numeric|required',
-                'tipo_mensajero' => 'in:externo,propio',
                 'valor_domicilio' => 'numeric',
                 'total' => 'numeric|required',
                 'cliente.id' => 'numeric|exists:clientes,id',
@@ -112,16 +112,16 @@ class PedidosController extends Controller
                 'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
                 'cliente.nombre_completo'  => 'required|string',
                 'cliente.email' => 'email',
-                'cliente.direccion_casa'  => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_otra',
-                'cliente.direccion_oficina' => 'string|required_without_all:cliente.direccion_casa,cliente.direccion_otra',
-                'cliente.direccion_otra' => 'string|required_without_all:cliente.direccion_oficina,cliente.direccion_casa',
                 'cliente.fecha_nacimiento' => 'date',
                 'cliente.establecimiento_id' => 'required|exists:establecimientos,id'
                 ];
                 try {
                     $validator = \Validator::make($datos, $rules);
+                    $validator->sometimes(['cliente.direccion_casa', 'cliente.direccion_oficina', 'cliente.direccion_otra'],
+                    'string|required_without_all:cliente.direccion_casa,cliente.direccion_oficina,cliente.direccion_otra', function($input) {
+                        return $input->tipo_pedido == 'domicilio';
+                    });
                     if ($validator->fails()) {
-                        $respuesta['result'] = false;
                         $respuesta['validator'] = $validator->errors()->all();
                         $respuesta['mensaje'] = '¡Error!';
                     } else {
@@ -137,7 +137,6 @@ class PedidosController extends Controller
                         }
                     }
                 } catch (Exception $e) {
-                    $respuesta['result'] = false;
                     $respuesta['mensaje'] = "Error: $e";
                 }
             }
@@ -157,14 +156,22 @@ class PedidosController extends Controller
                 $instancia = Pedido::find($id);
                 if ($instancia) {
                     $rules = [
-                    'detalles'      => 'required|string',
-                    'direccion' => 'required|string',
+                    'detalles'  => 'required|string',
+                    'direccion' => 'string|required_if:tipo_pedido,domicilio',
                     'numero' => 'required|numeric|digits_between:7,10',
-                    'enviado'  => 'required|boolean',
+                    'vendedor_id' => 'numeric|exists:vendedores,id',
+                    'tipo_pedido' => 'in:domicilio,mesa|required',
                     'subtotal' => 'numeric|required',
-                    'tipo_domicilio' => 'in:externo,propio',
                     'valor_domicilio' => 'numeric',
                     'total' => 'numeric|required',
+                    'cliente.id' => 'numeric|exists:clientes,id',
+                    'cliente.celular' => 'numeric|required_without:cliente.telefono|digits:10',
+                    'cliente.telefono' => 'numeric|required_without:cliente.celular|digits:7',
+                    'cliente.nombre_completo'  => 'required|string',
+                    'cliente.email' => 'email',
+                    'cliente.fecha_nacimiento' => 'date',
+                    'enviado'  => 'required|boolean',
+                    'tipo_mensajero' => 'in:externo,propio',
                     'establecimiento.mensaje' => 'string|required_if:enviado,1'
                     ];
                     try {
@@ -189,7 +196,9 @@ class PedidosController extends Controller
                             if ($guardo) {
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
-                                if(isset($segundos)) {
+                                if(isset($segundos) && $datos['tipo_pedido'] == 'domicilio') {
+                                    //Si segundos tiene valor quiere decir que va a despachar.
+                                    //Si es domicilio, se envía el mensaje.
                                     if($cliente['celular']) {
                                         //Construcción del mensaje personalizado
                                         $establecimiento = $datos['establecimiento'];

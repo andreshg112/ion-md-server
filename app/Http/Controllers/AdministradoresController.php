@@ -99,7 +99,7 @@ class AdministradoresController extends Controller
         } else {
             array_push($establecimientos_id, $establecimiento_id);
         }
-        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id and deleted_at is null) as total_pedidos'))
+        $consulta_base = Cliente::select(DB::raw('*, (select count(*) from pedidos where pedidos.cliente_id = clientes.id and enviado = 1 and deleted_at is null) as total_pedidos'))
         ->with('establecimiento')
         ->whereIn('establecimiento_id', $establecimientos_id)
         ->orderBy('total_pedidos', 'desc')->orderBy('nombre_completo', 'asc');
@@ -197,49 +197,49 @@ class AdministradoresController extends Controller
         ? $fecha_final->copy()->subMonth() : Carbon::parse($fecha_inicial_str);
         
         return Pedido
-        ::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, count(enviado) as pedidos_enviados')
+        ::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, count(enviado) as pedidos_enviados, sum(subtotal) as valor, sum(IF(tipo_mensajero = "propio" and tipo_pedido = "domicilio", valor_domicilio, 0)) as valor_domicilios')
         ->whereIn('vendedor_id', $vendedores_id)
         ->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final])
-        ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
+        ->where('enviado', 1)->groupBy('fecha')
         ->get();
     }
     
     //Retorna la el valor total por día de los pedidos, no la cantidad de pedidos
     //... en un período de tiempo determinado.
-    public function getValorPedidosPorDia(Request $request, $administrador_id)
+    /*public function getValorPedidosPorDia(Request $request, $administrador_id)
     {
-        $establecimiento_id = $request->get('establecimiento_id');
-        $sede_id = $request->get('sede_id');
-        $establecimientos_id = [];
-        $sedes_id = [];
-        
-        if(!isset($establecimiento_id)){
-            $establecimientos_id = Establecimiento::select('id')->where('administrador_id', $administrador_id)->get();
-        } else {
-            array_push($establecimientos_id, $establecimiento_id);
-        }
-        
-        if(!isset($sede_id)){
-            $sedes_id = Sede::select('id')->whereIn('establecimiento_id', $establecimientos_id)->get();
-        } else {
-            array_push($sedes_id, $sede_id);
-        }
-        
-        $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
-        
-        $fecha_final_str = $request->get('fecha_final');
-        $fecha_final = (!isset($fecha_final_str))
-        ? Carbon::now() : Carbon::parse($fecha_final_str);
-        $fecha_inicial_str = $request->get('fecha_inicial');
-        $fecha_inicial = (!isset($fecha_inicial_str))
-        ? $fecha_final->copy()->subMonth() : Carbon::parse($fecha_inicial_str);
-        
-        return Pedido::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, sum(total) as valor')
-        ->whereIn('vendedor_id', $vendedores_id)
-        ->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final])
-        ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
-        ->get();
+    $establecimiento_id = $request->get('establecimiento_id');
+    $sede_id = $request->get('sede_id');
+    $establecimientos_id = [];
+    $sedes_id = [];
+    
+    if(!isset($establecimiento_id)){
+    $establecimientos_id = Establecimiento::select('id')->where('administrador_id', $administrador_id)->get();
+    } else {
+    array_push($establecimientos_id, $establecimiento_id);
     }
+    
+    if(!isset($sede_id)){
+    $sedes_id = Sede::select('id')->whereIn('establecimiento_id', $establecimientos_id)->get();
+    } else {
+    array_push($sedes_id, $sede_id);
+    }
+    
+    $vendedores_id = Vendedor::select('id')->whereIn('sede_id', $sedes_id)->get();
+    
+    $fecha_final_str = $request->get('fecha_final');
+    $fecha_final = (!isset($fecha_final_str))
+    ? Carbon::now() : Carbon::parse($fecha_final_str);
+    $fecha_inicial_str = $request->get('fecha_inicial');
+    $fecha_inicial = (!isset($fecha_inicial_str))
+    ? $fecha_final->copy()->subMonth() : Carbon::parse($fecha_inicial_str);
+    
+    return Pedido::selectRaw('dayname(created_at) as dayname, date(created_at) as fecha, sum(total) as valor')
+    ->whereIn('vendedor_id', $vendedores_id)
+    ->whereBetween(DB::raw('date(created_at)'), [$fecha_inicial, $fecha_final])
+    ->where('enviado', 1)->groupBy('fecha')->havingRaw('fecha is not null')
+    ->get();
+    }*/
     
     public function getClientesPorGenero(Request $request, $administrador_id)
     {

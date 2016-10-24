@@ -8,7 +8,7 @@ Route::get('administradores/{administrador_id}/pedidos-por-dia-en-lapso', 'Admin
 
 Route::get('administradores/{administrador_id}/clientes-por-genero', 'AdministradoresController@getClientesPorGenero');
 
-Route::get('administradores/{administrador_id}/valor-pedidos-por-dia', 'AdministradoresController@getValorPedidosPorDia');
+//Route::get('administradores/{administrador_id}/valor-pedidos-por-dia', 'AdministradoresController@getValorPedidosPorDia');
 
 Route::post('administradores/{administrador_id}/felicitaciones', 'AdministradoresController@felicitarCliente');
 

@@ -17,13 +17,14 @@ class Pedido extends Model
 {
     use SoftDeletes;
     protected $table = 'pedidos';
-    protected $fillable = ['created_at', 'cliente_id', 'detalles', 'direccion', 'enviado', 'numero', 'subtotal', 'tiempo_despacho', 'tipo_mensajero', 'total', 'user_id', 'valor_domicilio', 'vendedor_id'];
+    protected $fillable = ['created_at', 'cliente_id', 'detalles', 'direccion', 'enviado', 'numero', 'subtotal', 'tiempo_despacho', 'tipo_mensajero', 'tipo_pedido', 'total', 'user_id', 'valor_domicilio', 'vendedor_id'];
     protected $dates = ['created_at', 'deleted_at', 'updated_at'];
     
     public function cliente()
     {
         return $this->belongsTo(Cliente::class);
     }
+    
     public function vendedor()
     {
         return $this->belongsTo(Vendedor::class);
