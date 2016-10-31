@@ -24,6 +24,7 @@ Route::group(['middleware' => 'cors'], function() {
     Route::group(['middleware' => 'jwt.auth'], function () {
         
         include('Routes/administradores.php');
+        include('Routes/vendedores.php');
         
         //Clientes
         Route::resource('clientes', 'ClientesController', ['only' => ['index', 'show', 'store']]);
@@ -44,8 +45,7 @@ Route::group(['middleware' => 'cors'], function() {
         
         //Users
         Route::resource('users', 'UsersController', ['only' => ['index', 'store', 'update', 'destroy']]);
+
         
-        //Vendedores
-        Route::resource('vendedores', 'VendedoresController', ['only' => ['index', 'store', 'destroy']]);
     });
 });
