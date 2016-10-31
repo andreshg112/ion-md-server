@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Models\Establecimiento;
 use App\Models\Pedido;
+use App\Models\Producto;
 use App\Models\Sede;
 use App\Models\Vendedor;
 use App\Http\Requests;
@@ -96,8 +97,6 @@ class PedidosController extends Controller
                 $respuesta['mensaje'] = 'Los datos enviados no tienen el formato correcto.';
             } else {
                 $datos = $request->all();
-                $cli = $datos['cliente'];
-                $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null;
                 $rules = [
                 'detalles'  => 'required|string',
                 'direccion' => 'string|required_if:tipo_pedido,domicilio',
@@ -113,7 +112,11 @@ class PedidosController extends Controller
                 'cliente.nombre_completo'  => 'required|string',
                 'cliente.email' => 'email',
                 'cliente.fecha_nacimiento' => 'date',
-                'cliente.establecimiento_id' => 'required|exists:establecimientos,id'
+                'cliente.establecimiento_id' => 'required|exists:establecimientos,id',
+                'productos' => 'array|required',
+                'productos.*.nombre' => 'string|required',
+                'productos.*.valor' => 'numeric|required',
+                'productos.*.id' => 'numeric|exists:productos,id'
                 ];
                 try {
                     $validator = \Validator::make($datos, $rules);
@@ -125,19 +128,34 @@ class PedidosController extends Controller
                         $respuesta['validator'] = $validator->errors()->all();
                         $respuesta['mensaje'] = '¡Error!';
                     } else {
-                        unset($datos['cliente']);
+                        $cli = $datos['cliente'];
+                        //unset($datos['cliente']);
+                        $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null;
+                        //Si no existe el cliente, se crea.
                         $cliente = Cliente::firstOrNew(['id' => $cli['id']]);
                         $cliente->fill($cli)->save();
-                        $respuesta['result'] = $cliente->pedidos()->save(new Pedido($datos));
-                        if ($respuesta['result']) {
-                            $respuesta['result']->load('cliente');
+                        $pedido = $cliente->pedidos()->save(new Pedido($datos));
+                        if ($pedido) {
+                            $productos = $datos['productos'];
+                            $pedido->productos()->saveMany(array_map(function($prod) use($cli){
+                                //Se proceden a guardar todos los productos.
+                                $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
+                                //Si no existe el producto, lo crea:
+                                $producto = Producto::firstOrNew(['id' => $prod['id']]);
+                                //Si existe el producto lo actualiza.
+                                $producto->establecimiento_id = $cli['establecimiento_id'];
+                                $producto->fill($prod)->save();
+                                return $producto;
+                            }, $productos));
+                            $pedido->load(['cliente', 'productos']);
+                            $respuesta['result'] = $pedido;
                             $respuesta['mensaje'] = "Registrado correctamente.";
                         } else {
                             $respuesta['mensaje'] = "No se pudo registrar.";
                         }
                     }
                 } catch (Exception $e) {
-                    $respuesta['mensaje'] = "Error: $e";
+                    $respuesta['mensaje'] = "Error: $e->getMessage()";
                 }
             }
         });
