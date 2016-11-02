@@ -76,7 +76,7 @@ class PedidosController extends Controller
             ? $establecimiento->vendedores->pluck('id') : [];
         }
         
-        $consulta_base = Pedido::with('cliente')->where('enviado', $enviado)
+        $consulta_base = Pedido::with(['cliente', 'productos'])->where('enviado', $enviado)
         ->whereIn('vendedor_id', $vendedores_id);
         
         if(isset($fecha_inicial_str)){
@@ -217,16 +217,22 @@ class PedidosController extends Controller
                                 if(isset($segundos) && $datos['tipo_pedido'] == 'domicilio') {
                                     //Si segundos tiene valor quiere decir que va a despachar.
                                     //Si es domicilio, se envía el mensaje.
-                                    if($cliente['celular']) {
-                                        //Construcción del mensaje personalizado
-                                        $establecimiento = $datos['establecimiento'];
-                                        $nombre = explode(' ', $cliente['nombre_completo']);
-                                        $mensaje = $nombre[0].', '.$establecimiento['mensaje'];
-                                        $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
-                                        $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
-                                        $respuesta['sms_restantes'] = Establecimiento::restarSMS($establecimiento['id']);
+                                    $establec = $datos['establecimiento'];
+                                    $establecimiento = Establecimiento::find($establec['id']);
+                                    if($establecimiento->sms_restantes > 0) {
+                                        //Si tiene mensajes...
+                                        if($cliente['celular']) {
+                                            //Construcción del mensaje personalizado
+                                            $nombre = explode(' ', $cliente['nombre_completo']);
+                                            $mensaje = $nombre[0].', '.$establec['mensaje'];
+                                            $destinatarios = Utilities::concatenarDestinatarios([$cliente]);
+                                            $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                            $respuesta['sms_restantes'] = Establecimiento::restarSMS($establec['id']);
+                                        } else {
+                                            $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
+                                        }
                                     } else {
-                                        $respuesta['notificacion'] = 'El cliente no tiene celular registrado para enviar un mensaje.';
+                                        $respuesta['sms_restantes'] = 0;
                                     }
                                 }
                             } else {
