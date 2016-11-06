@@ -190,7 +190,11 @@ class PedidosController extends Controller
                     'cliente.fecha_nacimiento' => 'date',
                     'enviado'  => 'required|boolean',
                     'tipo_mensajero' => 'in:externo,propio',
-                    'establecimiento.mensaje' => 'string|required_if:enviado,1'
+                    'establecimiento.mensaje' => 'string|required_if:enviado,1',
+                    'productos' => 'array|required',
+                    'productos.*.nombre' => 'string|required',
+                    'productos.*.valor' => 'numeric|required',
+                    'productos.*.id' => 'numeric|exists:productos,id'
                     ];
                     try {
                         $validator = \Validator::make($request->all(), $rules);
@@ -212,6 +216,31 @@ class PedidosController extends Controller
                             }
                             $guardo = $instancia->save();
                             if ($guardo) {
+                                
+                                //Actualizar cliente
+                                $cli = $datos['cliente'];
+                                $cli['id'] = (isset($cli['id'])) ? $cli['id'] : null;
+                                $cliente = Cliente::find($cli['id']);
+                                $cliente->fill($cli)->save();
+                                
+                                //Se quitan los productos que tenía
+                                $instancia->productos()->detach();
+                                
+                                //Actualizar productos
+                                $productos = $datos['productos'];
+                                $instancia->productos()->saveMany(array_map(function($prod) use($cli){
+                                    //Se proceden a guardar todos los productos.
+                                    $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
+                                    //Si no existe el producto, lo crea:
+                                    $producto = Producto::firstOrNew(['id' => $prod['id']]);
+                                    //Si existe el producto lo actualiza.
+                                    $producto->establecimiento_id = $cli['establecimiento_id'];
+                                    $producto->fill($prod)->save();
+                                    return $producto;
+                                }, $productos));
+                                
+                                $instancia->load(['cliente', 'productos']);
+                                
                                 $respuesta['mensaje'] = "Actualizado correctamente.";
                                 $respuesta['result'] = $instancia;
                                 if(isset($segundos) && $datos['tipo_pedido'] == 'domicilio') {
@@ -240,7 +269,7 @@ class PedidosController extends Controller
                             }
                         }
                     } catch (Exception $e) {
-                        $respuesta['mensaje'] = "Error: $e";
+                        $respuesta['mensaje'] = "Error: $e->getMessage()";
                     }
                 } else {
                     $respuesta['mensaje'] = 'No se encuentra registrado.';
