@@ -35,27 +35,34 @@ class AdministradoresController extends Controller
                     $datosRecibidos = $request->all();
                     $clientes = $datosRecibidos['clientes'];
                     unset($datosRecibidos['clientes']);
-                    $mensaje = $datosRecibidos['mensaje'];
-                    $instancia = new Oferta($datosRecibidos);
-                    $instancia->administrador_id = $administrador_id;
-                    $instancia_saved = $instancia->save();
-                    if($instancia_saved) {
-                        $respuesta['result'] = $instancia->clientes()->saveMany(
-                        array_map(function($cliente){
-                            return Cliente::find($cliente['id']);
-                        }, $clientes)
-                        );
-                        if($respuesta['result']){
-                            $destinatarios = Utilities::concatenarDestinatarios($clientes);
-                            $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
-                            $cantidadDestinatarios = count($clientes);
-                            //Solamente está restando 1.
-                            $respuesta['sms_restantes'] =
-                            Establecimiento::restarSMS($datosRecibidos['establecimiento_id']);
-                        } else {
-                            $instancia->delete();
-                            $respuesta['mensaje'] = 'No se pudo guardar.';
+                    
+                    //Validar si tiene los mensajes suficientes
+                    $cantidadDestinatarios = count($clientes);
+                    $establecimiento = Establecimiento::find($datosRecibidos['establecimiento_id']);
+                    if($establecimiento->sms_restantes >= $cantidadDestinatarios) {
+                        $mensaje = $datosRecibidos['mensaje'];
+                        $instancia = new Oferta($datosRecibidos);
+                        $instancia->administrador_id = $administrador_id;
+                        $instancia_saved = $instancia->save();
+                        if($instancia_saved) {
+                            $respuesta['result'] = $instancia->clientes()->saveMany(
+                            array_map(function($cliente){
+                                return Cliente::find($cliente['id']);
+                            }, $clientes)
+                            );
+                            if($respuesta['result']){
+                                $destinatarios = Utilities::concatenarDestinatarios($clientes);
+                                $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                                $establecimiento->sms_restantes -= $cantidadDestinatarios;
+                                $establecimiento->save();
+                                $respuesta['sms_restantes'] = $establecimiento->sms_restantes;
+                            } else {
+                                $instancia->delete();
+                                $respuesta['mensaje'] = 'No se pudo guardar.';
+                            }
                         }
+                    } else {
+                        $respuesta['mensaje'] = 'No tienes mensajes suficientes. Selecciona menos clientes.';
                     }
                 }
             } catch (Exception $e) {
