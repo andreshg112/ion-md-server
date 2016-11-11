@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests;
+use App\Models\Administrador;
+use App\Models\Cliente;
 use App\Models\Establecimiento;
+use App\Models\Oferta;
 use App\Models\Pedido;
-use DB;
 use App\Models\Sede;
 use App\Models\Vendedor;
-use App\Models\Cliente;
-use App\Models\Oferta;
-use App\Models\Administrador;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Http\Request;
 
 class AdministradoresController extends Controller
 {
@@ -24,18 +24,19 @@ class AdministradoresController extends Controller
             try {
                 $rules = [
                 'mensaje' => 'string|max:155|required',
-                'clientes.*.celular' => 'numeric|exists:clientes,celular'
+                'clientes.*.celular' => 'numeric|exists:clientes,celular',
+                "establecimiento_id' => 'numeric|exists:establecimientos,id,administrador_id,$administrador_id"
                 ];
                 $validator = \Validator::make($request->all(), $rules);
                 if ($validator->fails()) {
                     $respuesta['validator'] = $validator->errors()->all();
                     $respuesta['mensaje'] = '¡Error!';
                 } else {
-                    $datos_recibidos = $request->all();
-                    $clientes = $datos_recibidos['clientes'];
-                    unset($datos_recibidos['clientes']);
-                    $mensaje = $datos_recibidos['mensaje'];
-                    $instancia = new Oferta($datos_recibidos);
+                    $datosRecibidos = $request->all();
+                    $clientes = $datosRecibidos['clientes'];
+                    unset($datosRecibidos['clientes']);
+                    $mensaje = $datosRecibidos['mensaje'];
+                    $instancia = new Oferta($datosRecibidos);
                     $instancia->administrador_id = $administrador_id;
                     $instancia_saved = $instancia->save();
                     if($instancia_saved) {
@@ -47,6 +48,10 @@ class AdministradoresController extends Controller
                         if($respuesta['result']){
                             $destinatarios = Utilities::concatenarDestinatarios($clientes);
                             $respuesta['notificacion'] = MensajesController::enviarMensaje($destinatarios, $mensaje);
+                            $cantidadDestinatarios = count($clientes);
+                            //Solamente está restando 1.
+                            $respuesta['sms_restantes'] =
+                            Establecimiento::restarSMS($datosRecibidos['establecimiento_id']);
                         } else {
                             $instancia->delete();
                             $respuesta['mensaje'] = 'No se pudo guardar.';
