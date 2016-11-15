@@ -114,6 +114,7 @@ class PedidosController extends Controller
                 'cliente.email' => 'email',
                 'cliente.fecha_nacimiento' => 'date',
                 'cliente.establecimiento_id' => 'required|exists:establecimientos,id',
+                'cliente.administrador_id' => 'required|exists:administradores,id',
                 'productos' => 'array|required',
                 'productos.*.nombre' => 'string|required',
                 'productos.*.valor' => 'numeric|required',

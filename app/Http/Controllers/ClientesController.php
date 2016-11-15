@@ -18,10 +18,11 @@ class ClientesController extends Controller
     public function index(Request $request)
     {
         $nombre_completo = $request->input('nombre_completo', '');
-        $establecimiento_id = $request->input('establecimiento_id', '');
+        //$establecimiento_id = $request->input('establecimiento_id', '');
+        $administrador_id = $request->input('administrador_id', '');
         $limit = $request->get('limit');
         $consulta_base = Cliente::where('nombre_completo', 'like', "%$nombre_completo%")
-        ->where('establecimiento_id', $establecimiento_id)
+        ->where('administrador_id', $administrador_id)
         ->orderBy('nombre_completo', 'asc');
         if(isset($limit) && is_numeric($limit)) {
             $consulta_base->limit($limit);

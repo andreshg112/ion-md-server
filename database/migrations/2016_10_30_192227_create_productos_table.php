@@ -23,6 +23,7 @@ class CreateProductosTable extends Migration
             
             $table->timestamps();
             $table->softDeletes();
+            $table->engine = 'InnoDB'; //Olvidé colocarlo
         });
     }
     
