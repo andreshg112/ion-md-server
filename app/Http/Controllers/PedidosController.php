@@ -101,7 +101,8 @@ class PedidosController extends Controller
                 'detalles'  => 'required|string',
                 'direccion' => 'string|required_if:tipo_pedido,domicilio',
                 'numero' => 'required|numeric|digits_between:7,10',
-                'vendedor_id' => 'numeric|exists:vendedores,id',
+                'vendedor_id' => 'required|numeric|exists:vendedores,id,sede_id,'.$datos['sede_id'],
+                'sede_id' => 'required|numeric|exists:sedes,id',
                 'tipo_pedido' => 'in:domicilio,mesa|required',
                 'subtotal' => 'numeric|required',
                 'valor_domicilio' => 'numeric',
@@ -137,13 +138,14 @@ class PedidosController extends Controller
                         $pedido = $cliente->pedidos()->save(new Pedido($datos));
                         if ($pedido) {
                             $productos = $datos['productos'];
-                            $pedido->productos()->saveMany(array_map(function($prod) use($cli){
+                            $pedido->productos()->saveMany(array_map(function($prod) use($cli, $datos){
                                 //Se proceden a guardar todos los productos.
                                 $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
                                 //Si no existe el producto, lo crea:
                                 $producto = Producto::firstOrNew(['id' => $prod['id']]);
                                 //Si existe el producto lo actualiza.
                                 $producto->establecimiento_id = $cli['establecimiento_id'];
+                                $producto->sede_id = $datos['sede_id'];
                                 $producto->fill($prod)->save();
                                 return $producto;
                             }, $productos));
