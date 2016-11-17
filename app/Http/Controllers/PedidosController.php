@@ -139,6 +139,11 @@ class PedidosController extends Controller
                         $pedido = $cliente->pedidos()->save(new Pedido($datos));
                         if ($pedido) {
                             $productos = $datos['productos'];
+                            /*$detalles_producto = array_map(function($prod){
+                            unset($prod['nombre'], $prod['created_at'],
+                            $prod->updated_at, $prod->deleted_at);
+                            return $prod;
+                            }, $productos);*/
                             $pedido->productos()->saveMany(array_map(function($prod) use($cli, $datos){
                                 //Se proceden a guardar todos los productos.
                                 $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
