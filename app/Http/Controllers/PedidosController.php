@@ -139,11 +139,13 @@ class PedidosController extends Controller
                         $pedido = $cliente->pedidos()->save(new Pedido($datos));
                         if ($pedido) {
                             $productos = $datos['productos'];
-                            /*$detalles_producto = array_map(function($prod){
-                            unset($prod['nombre'], $prod['created_at'],
-                            $prod->updated_at, $prod->deleted_at);
-                            return $prod;
-                            }, $productos);*/
+                            $detalles_producto = array_map(function($prod){
+                                return [
+                                'comentario' => $prod['pivot']['comentario'],
+                                'valor' => $prod['valor'],
+                                'cantidad' => $prod['pivot']['cantidad']
+                                ];
+                            }, $productos);
                             $pedido->productos()->saveMany(array_map(function($prod) use($cli, $datos){
                                 //Se proceden a guardar todos los productos.
                                 $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
@@ -154,7 +156,7 @@ class PedidosController extends Controller
                                 $producto->sede_id = $datos['sede_id'];
                                 $producto->fill($prod)->save();
                                 return $producto;
-                            }, $productos));
+                            }, $productos), $detalles_producto);
                             $pedido->load(['cliente', 'productos']);
                             $respuesta['result'] = $pedido;
                             $respuesta['mensaje'] = "Registrado correctamente.";
@@ -236,6 +238,13 @@ class PedidosController extends Controller
                                 
                                 //Actualizar productos
                                 $productos = $datos['productos'];
+                                $detalles_producto = array_map(function($prod){
+                                    return [
+                                    'comentario' => $prod['pivot']['comentario'],
+                                    'valor' => $prod['valor'],
+                                    'cantidad' => $prod['pivot']['cantidad']
+                                    ];
+                                }, $productos);
                                 $instancia->productos()->saveMany(array_map(function($prod) use($cli){
                                     //Se proceden a guardar todos los productos.
                                     $prod['id'] = (isset($prod['id'])) ? $prod['id'] : null;
@@ -245,7 +254,7 @@ class PedidosController extends Controller
                                     $producto->establecimiento_id = $cli['establecimiento_id'];
                                     $producto->fill($prod)->save();
                                     return $producto;
-                                }, $productos));
+                                }, $productos), $detalles_producto);
                                 
                                 $instancia->load(['cliente', 'productos']);
                                 
