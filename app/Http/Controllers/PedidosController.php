@@ -140,8 +140,9 @@ class PedidosController extends Controller
                         if ($pedido) {
                             $productos = $datos['productos'];
                             $detalles_producto = array_map(function($prod){
+                                $comentario = isset($prod['pivot']['comentario']) ? $prod['pivot']['comentario'] : null;
                                 return [
-                                'comentario' => $prod['pivot']['comentario'],
+                                'comentario' => $comentario,
                                 'valor' => $prod['valor'],
                                 'cantidad' => $prod['pivot']['cantidad']
                                 ];
@@ -239,8 +240,9 @@ class PedidosController extends Controller
                                 //Actualizar productos
                                 $productos = $datos['productos'];
                                 $detalles_producto = array_map(function($prod){
+                                    $comentario = isset($prod['pivot']['comentario']) ? $prod['pivot']['comentario'] : null;
                                     return [
-                                    'comentario' => $prod['pivot']['comentario'],
+                                    'comentario' => $comentario,
                                     'valor' => $prod['valor'],
                                     'cantidad' => $prod['pivot']['cantidad']
                                     ];
